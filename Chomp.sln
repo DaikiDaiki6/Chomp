@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentService", "PaymentSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{8E968466-C9F0-4BFA-B423-1E028E8EF654}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{F8FBA9F2-03E9-4D82-A491-E83DD7F78FF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{8E968466-C9F0-4BFA-B423-1E028E8EF654}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E968466-C9F0-4BFA-B423-1E028E8EF654}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E968466-C9F0-4BFA-B423-1E028E8EF654}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8FBA9F2-03E9-4D82-A491-E83DD7F78FF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8FBA9F2-03E9-4D82-A491-E83DD7F78FF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8FBA9F2-03E9-4D82-A491-E83DD7F78FF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8FBA9F2-03E9-4D82-A491-E83DD7F78FF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
