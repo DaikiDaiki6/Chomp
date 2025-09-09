@@ -14,5 +14,5 @@ public record GetUserDto
     Roles Role,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    DateTime LastSignIn
+    DateTime? LastSignIn
 );

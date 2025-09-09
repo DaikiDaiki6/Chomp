@@ -11,11 +11,12 @@ namespace UserService.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UsersDbContext _dbcontext;
+        private readonly UsersDbContext _dbContext;
 
         public UserController(UsersDbContext dbContext)
         {
-            _dbcontext = dbContext;
+            _dbContext = dbContext;
+            //Serilog
         }
 
         [HttpGet] // Role Admin only
@@ -23,8 +24,8 @@ namespace UserService.Controllers
         {
             // check if loggedin 
             // if(User.Role == Admin) do this 
-            var allUsers = await _dbcontext.Users.ToListAsync();
-            if (allUsers is null || !allUsers.Any())
+            var allUsers = await _dbContext.Users.ToListAsync();
+            if (allUsers is null || allUsers.Count == 0)
             {
                 return NotFound(new { message = "There are no users in the database." });
             }
@@ -47,7 +48,7 @@ namespace UserService.Controllers
         public async Task<IActionResult> GetUserById(Guid id)
         {
             // check if logged in
-            var user = await _dbcontext.Users.FindAsync(id);
+            var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
                 return NotFound(new { message = $"There is no user with ID {id} in the database." });
@@ -70,24 +71,32 @@ namespace UserService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
+            // Check for duplicates
+            var existingUser = await _dbContext.Users
+                .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
+            
+            if (existingUser != null)
+            {
+                return BadRequest(new { message = "Username or email already exists." });
+            }
             // check if logged in
             var user = new User
             {
                 UserId = Guid.NewGuid(), 
                 Username = dto.Username,
-                Password = dto.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
                 ContactNo = dto.ContactNo,
-                Role = dto.Role,
+                Role = Roles.User,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                LastSignIn = DateTime.UtcNow 
+                LastSignIn = null
             };
 
-            _dbcontext.Users.Add(user);
-            await _dbcontext.SaveChangesAsync();
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
             return CreatedAtAction(nameof(GetUserById), new { id = user.UserId },
                 new GetUserDto(
                     user.UserId,
@@ -110,7 +119,7 @@ namespace UserService.Controllers
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
             // check if logged in
-            var user = await _dbcontext.Users.FindAsync(id);
+            var user = await _dbContext.Users.FindAsync(id);
 
             if (user is null)
             {
@@ -123,7 +132,7 @@ namespace UserService.Controllers
             }
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
-                user.Password = dto.Password;
+                user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);  
             }
             if (!string.IsNullOrWhiteSpace(dto.FirstName))
             {
@@ -144,7 +153,7 @@ namespace UserService.Controllers
 
             user.UpdatedAt = DateTime.UtcNow;
 
-            await _dbcontext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
             return Ok(new GetUserDto(
                 user.UserId,
@@ -167,14 +176,14 @@ namespace UserService.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             // check if logged in
-            var user = await _dbcontext.Users.FindAsync(id);
+            var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
                 return NotFound(new { message = $"There is no user with ID {id} in the database." });
             }
 
-            _dbcontext.Users.Remove(user);
-            await _dbcontext.SaveChangesAsync();
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
 
             return Ok(new { message = $"User with ID {id} is deleted successfully." });
             // publish event DeleteUserEvent

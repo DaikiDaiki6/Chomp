@@ -19,5 +19,5 @@ public class User
     public Roles Role { get; set; } = Roles.User;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime LastSignIn { get; set; } = DateTime.UtcNow;
+    public DateTime? LastSignIn { get; set; } = DateTime.UtcNow;
 }

@@ -12,8 +12,7 @@ public record CreateUserDto
     string LastName,
     string Email,
     string ContactNo,
-    Roles Role,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    DateTime LastSignIn
+    DateTime? LastSignIn
 );

@@ -5,6 +5,9 @@ public record UpdateUserEvent(Guid UserId, string Username, string Email, string
 public record DeleteUserEvent(Guid UserId, string Username, string Email, string ContactNo, DateTime UpdatedAt); // not sure with UpdatedAt
 
 public record CreateOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
+public record UpdateOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
+public record DeleteOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
+
 public record OrderSuccessEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
 public record OrderFailedEvent(Guid OrderId, Guid CustomerId, string Reason);
 public record OrderItem(Guid OrderItemId, int Quantity, decimal UnitPrice, Guid ProductId, string ProductName, decimal TotalPrice);
