@@ -32,25 +32,7 @@ namespace OrderService.Controllers
             {
                 return NotFound(new { message = "There are no orders in the database." });
             }
-            return Ok(allOrders.Select(order => new GetOrderDto(
-                order.OrderId,
-                order.CustomerId,
-                order.TotalPrice,
-                order.CreatedAt,
-                order.Status,
-                order.OrderItems.Select(e => new GetOrderItemDto(
-                    e.OrderItemId,
-                    e.Quantity,
-                    e.UnitPrice,
-                    new ProductDto(
-                        e.Product.ProductId,
-                        e.Product.ProductName,
-                        e.Product.Price,
-                        e.Product.Stock
-                    ),
-                    e.TotalPrice
-                )).ToList()
-            )));
+            return Ok(allOrders.Select(MapToGetOrderDto));
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
@@ -66,26 +48,7 @@ namespace OrderService.Controllers
             {
                 return NotFound(new { message = $"There is no order with ID {orderId} in the database." });
             }
-            return Ok(new GetOrderDto(
-                order.OrderId,
-                order.CustomerId,
-                order.TotalPrice,
-                order.CreatedAt,
-                order.Status,
-                order.OrderItems.Select(e => new GetOrderItemDto(
-                    e.OrderItemId,
-                    e.Quantity,
-                    e.UnitPrice,
-                    new ProductDto(
-                        e.Product.ProductId,
-                        e.Product.ProductName,
-                        e.Product.Price,
-                        e.Product.Stock
-                    ),
-                    e.TotalPrice
-                )).ToList()
-
-            ));
+            return Ok(MapToGetOrderDto(order));
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
@@ -93,18 +56,44 @@ namespace OrderService.Controllers
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
             // check if logged in
+
+            if (dto.OrderItems == null || dto.OrderItems.Count == 0)
+            {
+                return BadRequest(new { message = "Order must contain at least one item." });
+            }
+
+            // Get product IDs from the order items
+            var productIds = dto.OrderItems.Select(item => item.ProductId).ToList();
+
+            // Fetch products from database to get current prices
+            var products = await _dbContext.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .ToListAsync();
+
+            // Validate that all products exist
+            if (products.Count != productIds.Count)
+            {
+                var foundProductIds = products.Select(p => p.ProductId).ToHashSet();
+                var missingProductIds = productIds.Where(id => !foundProductIds.Contains(id));
+                return BadRequest(new { message = $"Products not found: {string.Join(", ", missingProductIds)}" });
+            }
+
             var order = new Order
             {
                 OrderId = Guid.NewGuid(),
                 CustomerId = dto.CustomerId,
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
-                OrderItems = dto.OrderItems.Select(item => new OrderItem
+                OrderItems = dto.OrderItems.Select(item =>
                 {
-                    OrderItemId = Guid.NewGuid(),
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice
+                    var product = products.First(p => p.ProductId == item.ProductId);
+                    return new OrderItem
+                    {
+                        OrderItemId = Guid.NewGuid(),
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = product.Price // Use current product price
+                    };
                 }).ToList()
             };
 
@@ -119,25 +108,7 @@ namespace OrderService.Controllers
 
             return CreatedAtAction(nameof(GetOrderById),
                 new { orderId = order.OrderId },
-                new GetOrderDto(
-                 createdOrder.OrderId,
-                 createdOrder.CustomerId,
-                 createdOrder.TotalPrice,
-                 createdOrder.CreatedAt,
-                 createdOrder.Status,
-                 createdOrder.OrderItems.Select(e => new GetOrderItemDto(
-                    e.OrderItemId,
-                    e.Quantity,
-                    e.UnitPrice,
-                    new ProductDto(
-                        e.Product.ProductId,
-                        e.Product.ProductName,
-                        e.Product.Price,
-                        e.Product.Stock
-                    ),
-                    e.TotalPrice
-                 )).ToList()
-                ));
+                MapToGetOrderDto(createdOrder));
 
             // publish event CreateOrderEvent
 
@@ -162,65 +133,53 @@ namespace OrderService.Controllers
 
             if (dto.OrderItems != null && dto.OrderItems.Count > 0)
             {
-                order.OrderItems.Clear();
-                foreach (var itemDto in dto.OrderItems)
+                // Filter out items with null ProductId or Quantity, then get product IDs
+                var validItems = dto.OrderItems.Where(item => item.ProductId.HasValue && item.Quantity.HasValue).ToList();
+
+                if (validItems.Count == 0)
                 {
+                    return BadRequest(new { message = "No valid order items provided. ProductId and Quantity are required." });
+                }
+
+                var productIds = validItems.Select(item => item.ProductId!.Value).ToList();
+
+                // Fetch products from database to get current prices
+                var products = await _dbContext.Products
+                    .Where(p => productIds.Contains(p.ProductId))
+                    .ToListAsync();
+
+                // Validate that all products exist
+                if (products.Count != productIds.Count)
+                {
+                    var foundProductIds = products.Select(p => p.ProductId).ToHashSet();
+                    var missingProductIds = productIds.Where(id => !foundProductIds.Contains(id));
+                    return BadRequest(new { message = $"Products not found: {string.Join(", ", missingProductIds)}" });
+                }
+
+                order.OrderItems.Clear();
+                foreach (var itemDto in validItems)
+                {
+                    var product = products.First(p => p.ProductId == itemDto.ProductId!.Value);
                     order.OrderItems.Add(new OrderItem
                     {
                         OrderItemId = Guid.NewGuid(),
                         OrderId = order.OrderId,
-                        ProductId = itemDto.ProductId,
-                        Quantity = itemDto.Quantity,
-                        UnitPrice = itemDto.UnitPrice,
+                        ProductId = itemDto.ProductId!.Value,
+                        Quantity = itemDto.Quantity!.Value,
+                        UnitPrice = product.Price, // Use current product price
                     });
                 }
-                
+
                 hasChanges = true;
             }
 
             if (!hasChanges)
             {
-                return Ok(new GetOrderDto(
-                    order.OrderId,
-                    order.CustomerId,
-                    order.TotalPrice,
-                    order.CreatedAt,
-                    order.Status,
-                    order.OrderItems.Select(e => new GetOrderItemDto(
-                        e.OrderItemId,
-                        e.Quantity,
-                        e.UnitPrice,
-                        new ProductDto(
-                            e.Product.ProductId,
-                            e.Product.ProductName,
-                            e.Product.Price,
-                            e.Product.Stock
-                        ),
-                        e.TotalPrice
-                    )).ToList()
-                ));
+                return Ok(MapToGetOrderDto(order));
             }
             await _dbContext.SaveChangesAsync();
 
-            return Ok(new GetOrderDto(
-                order.OrderId,
-                order.CustomerId,
-                order.TotalPrice,
-                order.CreatedAt,
-                order.Status,
-                order.OrderItems.Select(e => new GetOrderItemDto(
-                    e.OrderItemId,
-                    e.Quantity,
-                    e.UnitPrice,
-                    new ProductDto(
-                        e.Product.ProductId,
-                        e.Product.ProductName,
-                        e.Product.Price,
-                        e.Product.Stock
-                    ),
-                    e.TotalPrice
-                )).ToList()
-            ));
+            return Ok(MapToGetOrderDto(order));
 
             // publish event UpdateOrderEvent
 
@@ -244,6 +203,30 @@ namespace OrderService.Controllers
             // publish event DeleteOrderEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
+        }
+
+        // Helper method to reduce code duplication
+        private static GetOrderDto MapToGetOrderDto(Order order)
+        {
+            return new GetOrderDto(
+                order.OrderId,
+                order.CustomerId,
+                order.TotalPrice,
+                order.CreatedAt,
+                order.Status,
+                order.OrderItems.Select(e => new GetOrderItemDto(
+                    e.OrderItemId,
+                    e.Quantity,
+                    e.UnitPrice,
+                    new ProductDto(
+                        e.Product.ProductId,
+                        e.Product.ProductName,
+                        e.Product.Price,
+                        e.Product.Stock
+                    ),
+                    e.TotalPrice
+                )).ToList()
+            );
         }
     }
 }

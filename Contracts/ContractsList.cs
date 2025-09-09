@@ -12,6 +12,10 @@ public record OrderSuccessEvent(Guid OrderId, Guid CustomerId, decimal TotalPric
 public record OrderFailedEvent(Guid OrderId, Guid CustomerId, string Reason);
 public record OrderItem(Guid OrderItemId, int Quantity, decimal UnitPrice, Guid ProductId, string ProductName, decimal TotalPrice);
 
+public record CreateProductEvent();
+public record UpdateProductEvent();
+public record DeleteProductEvent();
+
 public record PaymentSuccessEvent(Guid PaymentId, Guid CustomerId, Guid OrderId, string Status);
 public record PaymentFailedEvent(Guid PaymentId, Guid CustomerId, Guid OrderId, string Reason);
 

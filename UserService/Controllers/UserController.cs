@@ -71,6 +71,7 @@ namespace UserService.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
+            // check if logged in
             // Check for duplicates
             var existingUser = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
@@ -79,7 +80,6 @@ namespace UserService.Controllers
             {
                 return BadRequest(new { message = "Username or email already exists." });
             }
-            // check if logged in
             var user = new User
             {
                 UserId = Guid.NewGuid(), 
