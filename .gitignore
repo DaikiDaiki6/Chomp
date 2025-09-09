@@ -1,2 +1,7 @@
 **/bin/
 **/obj/
+
+# Ignore sensitive appsettings but keep templates
+**/appsettings.Development.json
+
+# Keep base appsettings.json as template (passwords replaced with placeholders)
