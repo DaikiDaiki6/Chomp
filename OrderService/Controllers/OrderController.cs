@@ -81,7 +81,7 @@ namespace OrderService.Controllers
             var order = new Order
             {
                 OrderId = Guid.NewGuid(),
-                CustomerId = dto.CustomerId,
+                CustomerId = Guid.NewGuid(), // will change this to UserId later when I add log in function
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 OrderItems = dto.OrderItems.Select(item =>
