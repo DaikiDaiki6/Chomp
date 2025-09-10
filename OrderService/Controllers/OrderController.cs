@@ -94,8 +94,16 @@ namespace OrderService.Controllers
                         Quantity = item.Quantity,
                         UnitPrice = product.Price // Use current product price
                     };
-                }).ToList()
+                })
+                .Where(item => item.Quantity > 0)
+                .ToList()
             };
+
+            // Check if we have any valid items after filtering
+            if (order.OrderItems.Count == 0)
+            {
+                return BadRequest(new { message = "Order must contain at least one item with quantity greater than 0." });
+            }
 
             _dbContext.Orders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -115,6 +123,10 @@ namespace OrderService.Controllers
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
+        /// <summary>
+        /// Replace the entire order items with the provided list (smart merge).
+        /// Items not in the request will be removed. Use this when you want the order to match exactly what you send.
+        /// </summary>
         [HttpPatch("{id:guid}")]
         public async Task<IActionResult> EditOrder(Guid id, EditOrderDto dto)
         {
@@ -134,11 +146,11 @@ namespace OrderService.Controllers
             if (dto.OrderItems != null && dto.OrderItems.Count > 0)
             {
                 // Filter out items with null ProductId or Quantity, then get product IDs
-                var validItems = dto.OrderItems.Where(item => item.ProductId.HasValue && item.Quantity.HasValue).ToList();
+                var validItems = dto.OrderItems.Where(item => item.ProductId.HasValue && item.Quantity.HasValue && item.Quantity.Value > 0).ToList();
 
                 if (validItems.Count == 0)
                 {
-                    return BadRequest(new { message = "No valid order items provided. ProductId and Quantity are required." });
+                    return BadRequest(new { message = "No valid order items provided. ProductId and Quantity (greater than 0) are required." });
                 }
 
                 var productIds = validItems.Select(item => item.ProductId!.Value).ToList();
@@ -156,34 +168,203 @@ namespace OrderService.Controllers
                     return BadRequest(new { message = $"Products not found: {string.Join(", ", missingProductIds)}" });
                 }
 
-                order.OrderItems.Clear();
-                foreach (var itemDto in validItems)
+                // Smart merge: Treat request as desired final state
+                var requestedProductIds = validItems.Select(item => item.ProductId!.Value).ToHashSet();
+
+                // Step 1: Remove items not in the request (items being removed)
+                var itemsToRemove = order.OrderItems.Where(item => !requestedProductIds.Contains(item.ProductId)).ToList();
+                foreach (var item in itemsToRemove)
                 {
-                    var product = products.First(p => p.ProductId == itemDto.ProductId!.Value);
-                    order.OrderItems.Add(new OrderItem
-                    {
-                        OrderItemId = Guid.NewGuid(),
-                        OrderId = order.OrderId,
-                        ProductId = itemDto.ProductId!.Value,
-                        Quantity = itemDto.Quantity!.Value,
-                        UnitPrice = product.Price, // Use current product price
-                    });
+                    _dbContext.OrderItems.Remove(item);
+                    hasChanges = true;
                 }
 
-                hasChanges = true;
+                // Step 2: Update existing items and add new ones
+                foreach (var itemDto in validItems)
+                {
+                    var existingItem = order.OrderItems.FirstOrDefault(item => item.ProductId == itemDto.ProductId!.Value);
+                    var product = products.First(p => p.ProductId == itemDto.ProductId!.Value);
+
+                    if (existingItem != null)
+                    {
+                        // Update existing item if quantity or price changed
+                        if (existingItem.Quantity != itemDto.Quantity!.Value)
+                        {
+                            existingItem.Quantity = itemDto.Quantity!.Value;
+                            hasChanges = true;
+                        }
+                        if (existingItem.UnitPrice != product.Price)
+                        {
+                            existingItem.UnitPrice = product.Price;
+                            hasChanges = true;
+                        }
+                    }
+                    else
+                    {
+                        // Add new item
+                        var newItem = new OrderItem
+                        {
+                            OrderItemId = Guid.NewGuid(),
+                            OrderId = order.OrderId,
+                            ProductId = itemDto.ProductId!.Value,
+                            Quantity = itemDto.Quantity!.Value,
+                            UnitPrice = product.Price
+                        };
+                        _dbContext.OrderItems.Add(newItem);
+                        hasChanges = true;
+                    }
+                }
             }
 
             if (!hasChanges)
             {
                 return Ok(MapToGetOrderDto(order));
             }
+
             await _dbContext.SaveChangesAsync();
 
-            return Ok(MapToGetOrderDto(order));
+            // Reload the order with fresh data for response
+            var updatedOrder = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstAsync(o => o.OrderId == id);
+
+            return Ok(MapToGetOrderDto(updatedOrder));
 
             // publish event UpdateOrderEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
+        }
+
+        /// <summary>
+        /// Add new items to an existing order. If an item already exists, increases the quantity.
+        /// </summary>
+        [HttpPost("{id:guid}/items")]
+        public async Task<IActionResult> AddOrderItems(Guid id, List<CreateOrderItemDto> newItems)
+        {
+            // check if logged in
+            var order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order is null)
+            {
+                return NotFound(new { message = $"There is no order with ID {id} in the database." });
+            }
+
+            if (newItems == null || newItems.Count == 0)
+            {
+                return BadRequest(new { message = "At least one item must be provided." });
+            }
+
+            // Filter valid items
+            var validItems = newItems.Where(item => item.Quantity > 0).ToList();
+            if (validItems.Count == 0)
+            {
+                return BadRequest(new { message = "All items must have quantity greater than 0." });
+            }
+
+            var productIds = validItems.Select(item => item.ProductId).ToList();
+
+            // Fetch products to get current prices
+            var products = await _dbContext.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .ToListAsync();
+
+            // Validate that all products exist
+            if (products.Count != productIds.Count)
+            {
+                var foundProductIds = products.Select(p => p.ProductId).ToHashSet();
+                var missingProductIds = productIds.Where(id => !foundProductIds.Contains(id));
+                return BadRequest(new { message = $"Products not found: {string.Join(", ", missingProductIds)}" });
+            }
+
+            // Add new items or update existing ones
+            foreach (var itemDto in validItems)
+            {
+                var existingItem = order.OrderItems.FirstOrDefault(oi => oi.ProductId == itemDto.ProductId);
+                var product = products.First(p => p.ProductId == itemDto.ProductId);
+
+                if (existingItem != null)
+                {
+                    // Update quantity of existing item
+                    existingItem.Quantity += itemDto.Quantity;
+                    existingItem.UnitPrice = product.Price; // Update to current price
+                }
+                else
+                {
+                    // Add new item
+                    _dbContext.OrderItems.Add(new OrderItem
+                    {
+                        OrderItemId = Guid.NewGuid(),
+                        OrderId = id,
+                        ProductId = itemDto.ProductId,
+                        Quantity = itemDto.Quantity,
+                        UnitPrice = product.Price
+                    });
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+
+            // Return updated order
+            var updatedOrder = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstAsync(o => o.OrderId == id);
+
+            return Ok(MapToGetOrderDto(updatedOrder));
+        }
+
+        /// <summary>
+        /// Remove specific items from an order by product IDs.
+        /// </summary>
+        [HttpDelete("{id:guid}/items")]
+        public async Task<IActionResult> RemoveOrderItems(Guid id, List<Guid> productIdsToRemove)
+        {
+            // check if logged in
+            var order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order is null)
+            {
+                return NotFound(new { message = $"There is no order with ID {id} in the database." });
+            }
+
+            if (productIdsToRemove == null || productIdsToRemove.Count == 0)
+            {
+                return BadRequest(new { message = "At least one product ID must be provided." });
+            }
+
+            // Find items to remove
+            var itemsToRemove = order.OrderItems
+                .Where(oi => productIdsToRemove.Contains(oi.ProductId))
+                .ToList();
+
+            if (itemsToRemove.Count == 0)
+            {
+                return BadRequest(new { message = "No matching items found to remove." });
+            }
+
+            // Check if removing these items would leave the order empty
+            var remainingItems = order.OrderItems.Count - itemsToRemove.Count;
+            if (remainingItems == 0)
+            {
+                return BadRequest(new { message = "Cannot remove all items from order. Use DELETE /api/Order/{id} to delete the entire order." });
+            }
+
+            // Remove the items
+            _dbContext.OrderItems.RemoveRange(itemsToRemove);
+            await _dbContext.SaveChangesAsync();
+
+            // Return updated order
+            var updatedOrder = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstAsync(o => o.OrderId == id);
+
+            return Ok(MapToGetOrderDto(updatedOrder));
         }
 
         [HttpDelete("{id:guid}")]

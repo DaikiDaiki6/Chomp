@@ -75,14 +75,14 @@ namespace UserService.Controllers
             // Check for duplicates
             var existingUser = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
-            
+
             if (existingUser != null)
             {
                 return BadRequest(new { message = "Username or email already exists." });
             }
             var user = new User
             {
-                UserId = Guid.NewGuid(), 
+                UserId = Guid.NewGuid(),
                 Username = dto.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 FirstName = dto.FirstName,
@@ -126,13 +126,33 @@ namespace UserService.Controllers
                 return NotFound(new { message = $"There is no user with ID {id} in the database." });
             }
 
-            if (!string.IsNullOrWhiteSpace(dto.Username))
+            // Check for duplicate username if username is being updated
+            if (!string.IsNullOrWhiteSpace(dto.Username) && dto.Username != user.Username)
             {
+                var existingUserWithUsername = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Username == dto.Username && u.UserId != id);
+                if (existingUserWithUsername != null)
+                {
+                    return BadRequest(new { message = "Username already exists." });
+                }
                 user.Username = dto.Username;
             }
+
+            // Check for duplicate email if email is being updated
+            if (!string.IsNullOrWhiteSpace(dto.Email) && dto.Email != user.Email)
+            {
+                var existingUserWithEmail = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Email == dto.Email && u.UserId != id);
+                if (existingUserWithEmail != null)
+                {
+                    return BadRequest(new { message = "Email already exists." });
+                }
+                user.Email = dto.Email;
+            }
+
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
-                user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);  
+                user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             }
             if (!string.IsNullOrWhiteSpace(dto.FirstName))
             {
@@ -141,10 +161,6 @@ namespace UserService.Controllers
             if (!string.IsNullOrWhiteSpace(dto.LastName))
             {
                 user.LastName = dto.LastName;
-            }
-            if (!string.IsNullOrWhiteSpace(dto.Email))
-            {
-                user.Email = dto.Email;
             }
             if (!string.IsNullOrWhiteSpace(dto.ContactNo))
             {
