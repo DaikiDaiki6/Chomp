@@ -102,7 +102,7 @@ namespace UserService.Controllers
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             
-            // publish event CreateUserEvent
+            // publish event UserCreatedEvent
             await _publishEndpoint.Publish(new UserCreatedEvent(
                 user.UserId,
                 user.Username,
@@ -183,6 +183,15 @@ namespace UserService.Controllers
             user.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
+           
+            // publish event UserUpdatedEvent
+            await _publishEndpoint.Publish(new UserUpdatedEvent(
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ContactNo,
+                user.UpdatedAt
+            )); 
 
             return Ok(new GetUserDto(
                 user.UserId,
@@ -197,7 +206,6 @@ namespace UserService.Controllers
                 user.LastSignIn
             ));
 
-            // publish event UpdateUserEvent
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
@@ -214,8 +222,16 @@ namespace UserService.Controllers
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync();
 
+            // publish event UserDeletedEvent
+            await _publishEndpoint.Publish(new UserDeletedEvent(
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ContactNo,
+                DateTime.UtcNow
+            )); 
+
             return Ok(new { message = $"User with ID {id} is deleted successfully." });
-            // publish event DeleteUserEvent
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
     }

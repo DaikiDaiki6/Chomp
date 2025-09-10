@@ -16,6 +16,9 @@ public record UserUpdatedEvent(
 
 public record UserDeletedEvent(
     Guid UserId,
+    string Username,
+    string Email,
+    string ContactNo,
     DateTime DeletedAt);
 
 // ----------------------

@@ -1,6 +1,7 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Hosting;
 using NotificationService.Consumers;
+using NotificationService.Consumers.UserEvents;
 
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
@@ -8,7 +9,8 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddMassTransit(x =>
         {
             x.AddConsumer<UserCreatedConsumer>();
-
+            x.AddConsumer<UserUpdatedConsumer>();
+            x.AddConsumer<UserDeletedConsumer>();
             x.UsingRabbitMq((context, config) =>
             {
                 config.Host("rabbitmq://localhost");
@@ -16,6 +18,8 @@ var builder = Host.CreateDefaultBuilder(args)
                 config.ReceiveEndpoint("notification-service", e =>
                 {
                     e.ConfigureConsumer<UserCreatedConsumer>(context);
+                    e.ConfigureConsumer<UserUpdatedConsumer>(context);
+                    e.ConfigureConsumer<UserDeletedConsumer>(context);
                 });
             });
         }); 
