@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 
@@ -8,15 +9,23 @@ builder.Services.AddDbContext<UsersDbContext>(opt =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMassTransit( x =>
+{
+    x.UsingRabbitMq((context, config) =>
+    {
+        config.Host("rabbitmq://localhost");
+    });
+}
+);
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.MapControllers();
 app.Run();

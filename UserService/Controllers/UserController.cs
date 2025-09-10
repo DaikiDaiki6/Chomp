@@ -1,3 +1,5 @@
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +14,12 @@ namespace UserService.Controllers
     public class UserController : ControllerBase
     {
         private readonly UsersDbContext _dbContext;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public UserController(UsersDbContext dbContext)
+        public UserController(UsersDbContext dbContext, IPublishEndpoint publishEndpoint)
         {
             _dbContext = dbContext;
+            _publishEndpoint = publishEndpoint;
             //Serilog
         }
 
@@ -97,6 +101,16 @@ namespace UserService.Controllers
 
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
+            
+            // publish event CreateUserEvent
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ContactNo,
+                user.CreatedAt
+            ));
+
             return CreatedAtAction(nameof(GetUserById), new { id = user.UserId },
                 new GetUserDto(
                     user.UserId,
@@ -110,7 +124,6 @@ namespace UserService.Controllers
                     user.UpdatedAt,
                     user.LastSignIn
                 ));
-            // publish event CreateUserEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
