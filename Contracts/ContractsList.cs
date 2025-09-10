@@ -1,22 +1,96 @@
 ﻿namespace Contracts;
 
-public record CreateUserEvent(Guid UserId, string Username, string Email, string ContactNo, DateTime CreateAt);
-public record UpdateUserEvent(Guid UserId, string Username, string Email, string ContactNo, DateTime UpdatedAt);
-public record DeleteUserEvent(Guid UserId, string Username, string Email, string ContactNo, DateTime UpdatedAt); // not sure with UpdatedAt
+public record UserCreatedEvent(
+    Guid UserId,
+    string Username,
+    string Email,
+    string ContactNo,
+    DateTime CreatedAt);
 
-public record CreateOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
-public record UpdateOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
-public record DeleteOrderEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
+public record UserUpdatedEvent(
+    Guid UserId,
+    string Username,
+    string Email,
+    string ContactNo,
+    DateTime UpdatedAt);
 
-public record OrderSuccessEvent(Guid OrderId, Guid CustomerId, decimal TotalPrice, DateTime CreatedAt, List<OrderItem> OrderItems);
-public record OrderFailedEvent(Guid OrderId, Guid CustomerId, string Reason);
-public record OrderItem(Guid OrderItemId, int Quantity, decimal UnitPrice, Guid ProductId, string ProductName, decimal TotalPrice);
+public record UserDeletedEvent(
+    Guid UserId,
+    DateTime DeletedAt);
 
-public record CreateProductEvent();
-public record UpdateProductEvent();
-public record DeleteProductEvent();
+// ----------------------
+// ORDER EVENTS
+// ----------------------
+public record OrderPlacedEvent(
+    Guid OrderId,
+    Guid CustomerId,
+    decimal TotalPrice,
+    DateTime CreatedAt,
+    List<OrderItem> Items);
 
-public record PaymentSuccessEvent(Guid PaymentId, Guid CustomerId, Guid OrderId, string Status);
-public record PaymentFailedEvent(Guid PaymentId, Guid CustomerId, Guid OrderId, string Reason);
+public record OrderUpdatedEvent(
+    Guid OrderId,
+    Guid CustomerId,
+    decimal TotalPrice,
+    DateTime UpdatedAt,
+    List<OrderItem> Items);
+
+public record OrderCancelledEvent(
+    Guid OrderId,
+    Guid CustomerId,
+    string Reason,
+    DateTime CancelledAt);
+
+public record OrderCompletedEvent(
+    Guid OrderId,
+    Guid CustomerId,
+    decimal TotalPrice,
+    DateTime CompletedAt);
+
+// Reuseable record for nested details
+public record OrderItem(
+    Guid OrderItemId,
+    int Quantity,
+    decimal UnitPrice,
+    Guid ProductId,
+    string ProductName);
+
+// ----------------------
+// PRODUCT EVENTS
+// ----------------------
+public record ProductCreatedEvent(
+    Guid ProductId,
+    string ProductName,
+    decimal Price,
+    int Stock,
+    DateTime CreatedAt);
+
+public record ProductUpdatedEvent(
+    Guid ProductId,
+    string ProductName,
+    decimal Price,
+    int Stock,
+    DateTime UpdatedAt);
+
+public record ProductDeletedEvent(
+    Guid ProductId,
+    DateTime DeletedAt);
+
+// ----------------------
+// PAYMENT EVENTS
+// ----------------------
+public record PaymentSucceededEvent(
+    Guid PaymentId,
+    Guid OrderId,
+    Guid CustomerId,
+    decimal Amount,
+    DateTime PaidAt);
+
+public record PaymentFailedEvent(
+    Guid PaymentId,
+    Guid OrderId,
+    Guid CustomerId,
+    string Reason,
+    DateTime FailedAt);
 
 
