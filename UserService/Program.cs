@@ -1,9 +1,14 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using UserService.Data;
+using UserService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Logging
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
+// Services
 builder.Services.AddDbContext<UsersDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("ChompUsersDb")));
 builder.Services.AddControllers();
@@ -19,7 +24,8 @@ builder.Services.AddMassTransit( x =>
 );
 
 var app = builder.Build();
-
+// global exception handling for (mainly) controllers but also all services
+app.UseExceptionHandling(); 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 if (app.Environment.IsDevelopment())
@@ -28,4 +34,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapControllers();
-app.Run();
+
+try
+{
+    Log.Information("Starting up {ServiceName}", builder.Environment.ApplicationName);
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application start up failed");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

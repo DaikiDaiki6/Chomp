@@ -15,24 +15,30 @@ namespace UserService.Controllers
     {
         private readonly UsersDbContext _dbContext;
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UsersDbContext dbContext, IPublishEndpoint publishEndpoint)
+        public UserController(UsersDbContext dbContext, IPublishEndpoint publishEndpoint, ILogger<UserController> logger)
         {
             _dbContext = dbContext;
             _publishEndpoint = publishEndpoint;
-            //Serilog
+            _logger = logger;
         }
 
         [HttpGet] // Role Admin only
         public async Task<IActionResult> GetAll() //From UserInfo
         {
+            _logger.LogInformation("Getting all users - Admin Request");
+
             // check if loggedin 
             // if(User.Role == Admin) do this 
             var allUsers = await _dbContext.Users.ToListAsync();
             if (allUsers is null || allUsers.Count == 0)
             {
+                _logger.LogWarning("No users found in the database.");
                 return NotFound(new { message = "There are no users in the database." });
             }
+
+            _logger.LogInformation("Successfully retrieved {UserCount} users.", allUsers.Count);
             return Ok(allUsers.Select(user => new GetUserDto(
                 user.UserId,
                 user.Username,
