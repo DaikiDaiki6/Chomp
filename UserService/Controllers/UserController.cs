@@ -27,15 +27,15 @@ namespace UserService.Controllers
         [HttpGet] // Role Admin only
         public async Task<IActionResult> GetAll() //From UserInfo
         {
-            _logger.LogInformation("Getting all users - Admin Request");
 
             // check if loggedin 
             // if(User.Role == Admin) do this 
+            _logger.LogInformation("Getting all users - Admin Request");
             var allUsers = await _dbContext.Users.ToListAsync();
             if (allUsers is null || allUsers.Count == 0)
             {
                 _logger.LogWarning("No users found in the database.");
-                return NotFound(new { message = "There are no users in the database." });
+                return NotFound(new { errorMessage = "There are no users in the database." });
             }
 
             _logger.LogInformation("Successfully retrieved {UserCount} users.", allUsers.Count);
@@ -51,18 +51,26 @@ namespace UserService.Controllers
                 user.UpdatedAt,
                 user.LastSignIn
             )));
-            // else Return Unathorized({message: "You are not authorized for this action."})
+            // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpGet("{id:guid}")] // mainly for Admin -- can be abused (User can use it too)
         public async Task<IActionResult> GetUserById(Guid id)
         {
             // check if logged in
+            // check role 
+            // if user _logger.LogInformation("Getting all users - User {id} Request", id);
+            // if admin _logger.LogInformation("Getting all users - Admin Request");
+            _logger.LogInformation("Getting all users - Admin Request"); //temporary
+
             var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
-                return NotFound(new { message = $"There is no user with ID {id} in the database." });
+                _logger.LogWarning("No user {id} found in the database.", id);
+                return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
+
+            _logger.LogInformation("Successfully retrieved user {id}.", id);
             return Ok(new GetUserDto(
                 user.UserId,
                 user.Username,
@@ -75,20 +83,22 @@ namespace UserService.Controllers
                 user.UpdatedAt,
                 user.LastSignIn
             ));
-            // else Return Unathorized({message: "You are not authorized for this action."})
+            // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
             // check if logged in
+            _logger.LogInformation("Creating a user."); // add UserId when logged in is added
             // Check for duplicates
             var existingUser = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
 
             if (existingUser != null)
             {
-                return BadRequest(new { message = "Username or email already exists." });
+                _logger.LogWarning("User {id} already exists in the database.", existingUser.UserId);
+                return BadRequest(new { errorMessage = "Username or email already exists." });
             }
             var user = new User
             {
@@ -107,8 +117,9 @@ namespace UserService.Controllers
 
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
-            
+
             // publish event UserCreatedEvent
+            _logger.LogInformation("Created user event for user {id} is passed to the message bus.", user.UserId);
             await _publishEndpoint.Publish(new UserCreatedEvent(
                 user.UserId,
                 user.Username,
@@ -116,7 +127,7 @@ namespace UserService.Controllers
                 user.ContactNo,
                 user.CreatedAt
             ));
-
+            _logger.LogInformation("Successfully created user {id}.", user.UserId);
             return CreatedAtAction(nameof(GetUserById), new { id = user.UserId },
                 new GetUserDto(
                     user.UserId,
@@ -131,18 +142,20 @@ namespace UserService.Controllers
                     user.LastSignIn
                 ));
 
-            // else Return Unathorized({message: "You are not authorized for this action."})
+            // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpPatch("{id:guid}")]
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
             // check if logged in
+            _logger.LogInformation("Updating a user."); // add UserId when logged in is added
             var user = await _dbContext.Users.FindAsync(id);
 
             if (user is null)
             {
-                return NotFound(new { message = $"There is no user with ID {id} in the database." });
+                _logger.LogWarning("No user {id} found in the database.", id);
+                return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
 
             // Check for duplicate username if username is being updated
@@ -152,7 +165,8 @@ namespace UserService.Controllers
                     .FirstOrDefaultAsync(u => u.Username == dto.Username && u.UserId != id);
                 if (existingUserWithUsername != null)
                 {
-                    return BadRequest(new { message = "Username already exists." });
+                    _logger.LogWarning("Username {username} already exists in the database.", user.Username);
+                    return BadRequest(new { errorMessage = "Username already exists." });
                 }
                 user.Username = dto.Username;
             }
@@ -164,7 +178,8 @@ namespace UserService.Controllers
                     .FirstOrDefaultAsync(u => u.Email == dto.Email && u.UserId != id);
                 if (existingUserWithEmail != null)
                 {
-                    return BadRequest(new { message = "Email already exists." });
+                    _logger.LogWarning("Email {email} already exists in the database.", user.Email);
+                    return BadRequest(new { errorMessage = "Email already exists." });
                 }
                 user.Email = dto.Email;
             }
@@ -189,8 +204,9 @@ namespace UserService.Controllers
             user.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
-           
+
             // publish event UserUpdatedEvent
+            _logger.LogInformation("Updated user event for user {id} is passed to the message bus.", user.UserId);
             await _publishEndpoint.Publish(new UserUpdatedEvent(
                 user.UserId,
                 user.Username,
@@ -198,7 +214,7 @@ namespace UserService.Controllers
                 user.ContactNo,
                 user.UpdatedAt
             )); 
-
+            _logger.LogInformation("Successfully updated user {id}.", user.UserId);
             return Ok(new GetUserDto(
                 user.UserId,
                 user.Username,
@@ -212,33 +228,36 @@ namespace UserService.Controllers
                 user.LastSignIn
             ));
 
-            // else Return Unathorized({message: "You are not authorized for this action."})
+            // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             // check if logged in
+            _logger.LogInformation("Deleting a user."); // add UserId when logged in is added
             var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
-                return NotFound(new { message = $"There is no user with ID {id} in the database." });
+                _logger.LogWarning("No user {id} found in the database.", id);
+                return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
 
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync();
 
             // publish event UserDeletedEvent
+            _logger.LogInformation("Deleted user event for user {id} is passed to the message bus.", user.UserId);
             await _publishEndpoint.Publish(new UserDeletedEvent(
                 user.UserId,
                 user.Username,
-                user.Email,
+                user.Email, 
                 user.ContactNo,
                 DateTime.UtcNow
             )); 
-
-            return Ok(new { message = $"User with ID {id} is deleted successfully." });
-            // else Return Unathorized({message: "You are not authorized for this action."})
+            _logger.LogInformation("Successfully deleted user {id}.", user.UserId);
+            return Ok(new { errorMessage = $"User with ID {id} is deleted successfully." });
+            // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
     }
 }
