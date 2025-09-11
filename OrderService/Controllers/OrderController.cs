@@ -44,7 +44,7 @@ namespace OrderService.Controllers
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
-        [HttpGet("{orderId:guid}")] // mainly for Admin -- can be abused (User can use it too)
+        [HttpGet("{id:guid}")] // mainly for Admin -- can be abused (User can use it too)
         public async Task<IActionResult> GetOrderById(Guid id)
         {
             // check if logged in 
@@ -92,6 +92,28 @@ namespace OrderService.Controllers
                 var missingProductIds = productIds.Where(id => !foundProductIds.Contains(id));
                 _logger.LogWarning("Product(s) in the order not found in the Product Database: {productIds}", string.Join(",", missingProductIds));
                 return BadRequest(new { message = $"Products not found: {string.Join(", ", missingProductIds)}" });
+            }
+
+            // Validate stock availability
+            var stockErrors = new List<string>();
+            foreach (var item in dto.OrderItems)
+            {
+                var product = products.First(p => p.ProductId == item.ProductId);
+                if (product.Stock < item.Quantity)
+                {
+                    stockErrors.Add($"Product '{product.ProductName}': Requested {item.Quantity}, Available {product.Stock}");
+                    _logger.LogWarning("Stock validation failed - Product {ProductId} ({ProductName}): Requested {RequestedQuantity}, Available {AvailableStock}", 
+                        product.ProductId, product.ProductName, item.Quantity, product.Stock);
+                }
+            }
+
+            if (stockErrors.Any())
+            {
+                _logger.LogWarning("Order creation failed - Insufficient stock for {ProductCount} products", stockErrors.Count);
+                return BadRequest(new { 
+                    message = "Insufficient stock for the following products:", 
+                    stockErrors = stockErrors 
+                });
             }
 
             var order = new Order
@@ -149,10 +171,52 @@ namespace OrderService.Controllers
 
             _logger.LogInformation("Successfully created order {OrderId}.", order.OrderId);
             return CreatedAtAction(nameof(GetOrderById),
-                new { orderId = order.OrderId },
+                new { id = order.OrderId },
                 MapToGetOrderDto(createdOrder));
 
             // else Return Unathorized({message: "You are not authorized for this action."})
+        }
+
+        [HttpPatch("{id:guid}/confirm-order")]
+        public async Task<IActionResult> ConfirmOrder(Guid id)
+        {
+            // check if logged in
+            _logger.LogInformation("Confirming order {OrderId}.", id);
+
+            var order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order is null)
+            {
+                _logger.LogWarning("No order {OrderId} found in the database.", id);
+                return NotFound(new { message = $"There is no order with ID {id} in the database." });
+            }
+
+            if (order.Status != OrderStatus.Pending)
+            {
+                _logger.LogWarning("Order confirmation failed - Order {OrderId} is already {Status}.", id, order.Status);
+                return BadRequest(new { message = $"Order is already {order.Status}. Only pending orders can be confirmed." });
+            }
+            _logger.LogInformation("Order {OrderId} total price: ${TotalPrice}", id, order.TotalPrice);
+            order.Status = OrderStatus.Confirmed;
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("Order confirmed event for order {OrderId} is passed to the message bus.", order.OrderId);
+            await _publishEndpoint.Publish(new OrderConfirmedEvent(
+                order.OrderId,
+                order.CustomerId,
+                order.TotalPrice,
+                DateTime.UtcNow
+            ));
+            _logger.LogInformation("Successfully confirmed order {OrderId}.", order.OrderId);
+            return Ok(new
+            {
+                message = "Order is confirmed and is being processed by the payment service",
+                order = MapToGetOrderDto(order)
+            }
+            );
         }
 
         /// <summary>
@@ -356,7 +420,7 @@ namespace OrderService.Controllers
                     var oldQuantity = existingItem.Quantity;
                     existingItem.Quantity += itemDto.Quantity;
                     existingItem.UnitPrice = product.Price; // Update to current price
-                    _logger.LogDebug("Updated existing item {ProductId} in order {OrderId}: quantity {OldQuantity} -> {NewQuantity}", 
+                    _logger.LogDebug("Updated existing item {ProductId} in order {OrderId}: quantity {OldQuantity} -> {NewQuantity}",
                         itemDto.ProductId, id, oldQuantity, existingItem.Quantity);
                     itemsUpdated++;
                 }
@@ -371,14 +435,14 @@ namespace OrderService.Controllers
                         Quantity = itemDto.Quantity,
                         UnitPrice = product.Price
                     });
-                    _logger.LogDebug("Added new item {ProductId} to order {OrderId} with quantity {Quantity}", 
+                    _logger.LogDebug("Added new item {ProductId} to order {OrderId} with quantity {Quantity}",
                         itemDto.ProductId, id, itemDto.Quantity);
                     itemsAdded++;
                 }
             }
 
             await _dbContext.SaveChangesAsync();
-            _logger.LogInformation("Successfully added/updated items in order {OrderId}: {ItemsAdded} new, {ItemsUpdated} updated.", 
+            _logger.LogInformation("Successfully added/updated items in order {OrderId}: {ItemsAdded} new, {ItemsUpdated} updated.",
                 id, itemsAdded, itemsUpdated);
 
             // Return updated order
@@ -431,7 +495,7 @@ namespace OrderService.Controllers
                 return BadRequest(new { message = "At least one product ID must be provided." });
             }
 
-            _logger.LogInformation("Attempting to remove {ProductCount} product(s) from order {OrderId}: {ProductIds}", 
+            _logger.LogInformation("Attempting to remove {ProductCount} product(s) from order {OrderId}: {ProductIds}",
                 productIdsToRemove.Count, id, string.Join(",", productIdsToRemove));
 
             // Find items to remove
@@ -441,7 +505,7 @@ namespace OrderService.Controllers
 
             if (itemsToRemove.Count == 0)
             {
-                _logger.LogWarning("Remove items failed - No matching items found in order {OrderId} for product IDs: {ProductIds}", 
+                _logger.LogWarning("Remove items failed - No matching items found in order {OrderId} for product IDs: {ProductIds}",
                     id, string.Join(",", productIdsToRemove));
                 return BadRequest(new { message = "No matching items found to remove." });
             }
@@ -470,7 +534,7 @@ namespace OrderService.Controllers
             }
 
             // Remove only the specified items
-            _logger.LogInformation("Removing {ItemCount} items from order {OrderId}, {RemainingCount} items will remain.", 
+            _logger.LogInformation("Removing {ItemCount} items from order {OrderId}, {RemainingCount} items will remain.",
                 itemsToRemove.Count, id, remainingItems);
             _dbContext.OrderItems.RemoveRange(itemsToRemove);
             await _dbContext.SaveChangesAsync();

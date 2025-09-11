@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PaymentService.Consumers;
 using PaymentService.Data;
 
 var builder = Host.CreateDefaultBuilder(args)
@@ -14,14 +15,16 @@ var builder = Host.CreateDefaultBuilder(args)
         // Configure MassTransit properly
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<OrderConfirmedConsumer>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("localhost", "/", h =>
+                cfg.Host("rabbitmq://localhost");
+
+                cfg.ReceiveEndpoint("payment-service", e =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
+                    e.ConfigureConsumer<OrderConfirmedConsumer>(context);
                 });
-                cfg.ConfigureEndpoints(context);
             });
         });
     });

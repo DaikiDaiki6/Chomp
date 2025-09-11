@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using OrderService.Consumers;
 using OrderService.Data;
 using OrderService.Middleware;
 using Serilog;
@@ -16,9 +17,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<PaymentFailedConsumer>();
+    x.AddConsumer<PaymentSucceededConsumer>();
+
     x.UsingRabbitMq((context, config) =>
     {
-        config.Host("rabbitmq//localhost");
+        config.Host("rabbitmq://localhost");
+
+        config.ReceiveEndpoint(e =>
+        {
+            e.ConfigureConsumer<PaymentFailedConsumer>(context);
+            e.ConfigureConsumer<PaymentSucceededConsumer>(context);
+        });
     }
     );
 });

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using NotificationService.Consumers;
 using NotificationService.Consumers.OrderEvents;
+using NotificationService.Consumers.PaymentEvents;
 using NotificationService.Consumers.ProductEvents;
 using NotificationService.Consumers.UserEvents;
 
@@ -25,6 +26,10 @@ var builder = Host.CreateDefaultBuilder(args)
             x.AddConsumer<OrderUpdatedConsumer>();
             x.AddConsumer<OrderCancelledConsumer>();
 
+            // payment event consumers
+            x.AddConsumer<PaymentFailedConsumer>();
+            x.AddConsumer<PaymentSucceededConsumer>();
+
             x.UsingRabbitMq((context, config) =>
             {
                 config.Host("rabbitmq://localhost");
@@ -45,9 +50,13 @@ var builder = Host.CreateDefaultBuilder(args)
                     e.ConfigureConsumer<OrderPlacedConsumer>(context);
                     e.ConfigureConsumer<OrderUpdatedConsumer>(context);
                     e.ConfigureConsumer<OrderCancelledConsumer>(context);
+
+                    // payment event consumers
+                    e.ConfigureConsumer<PaymentFailedConsumer>(context);
+                    e.ConfigureConsumer<PaymentSucceededConsumer>(context);
                 });
             });
-        }); 
+        });
     });
 
 await builder.RunConsoleAsync();

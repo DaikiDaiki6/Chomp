@@ -44,7 +44,7 @@ public record OrderCancelledEvent(
     string Reason,
     DateTime CancelledAt);
 
-public record OrderCompletedEvent(
+public record OrderConfirmedEvent(
     Guid OrderId,
     Guid CustomerId,
     decimal TotalPrice,

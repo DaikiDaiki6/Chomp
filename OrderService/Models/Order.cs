@@ -5,9 +5,10 @@ namespace OrderService.Models;
 
 public enum OrderStatus
 {
-    Pending,
-    Completed,
-    Refunded
+    Pending, // Order is being edited
+    Confirmed,  // Order is processing w/ payment
+    Completed, // Order is done
+    Cancelled // Order rejected
 }
 public class Order
 {
