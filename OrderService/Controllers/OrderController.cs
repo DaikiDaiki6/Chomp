@@ -1,3 +1,5 @@
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
@@ -11,9 +13,11 @@ namespace OrderService.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrdersDbContext _dbContext;
-        public OrderController(OrdersDbContext dbContext)
+        private readonly IPublishEndpoint _publishEndpoint;
+        public OrderController(OrdersDbContext dbContext, IPublishEndpoint publishEndpoint)
         {
             _dbContext = dbContext;
+            _publishEndpoint = publishEndpoint;
             //Serilog
         }
 
@@ -44,6 +48,7 @@ namespace OrderService.Controllers
                 .Include(o => o.OrderItems)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId); // and (o => userId == o.CustomerId)
+                
             if (order is null)
             {
                 return NotFound(new { message = $"There is no order with ID {orderId} in the database." });
@@ -87,7 +92,7 @@ namespace OrderService.Controllers
                 OrderItems = dto.OrderItems.Select(item =>
                 {
                     var product = products.First(p => p.ProductId == item.ProductId);
-                    return new OrderItem
+                    return new Models.OrderItem
                     {
                         OrderItemId = Guid.NewGuid(),
                         ProductId = item.ProductId,
@@ -114,11 +119,25 @@ namespace OrderService.Controllers
                 .ThenInclude(o => o.Product)
                 .FirstAsync(o => o.OrderId == order.OrderId);
 
+            // publish event CreateOrderEvent
+            await _publishEndpoint.Publish(new OrderPlacedEvent(
+                createdOrder.OrderId,
+                createdOrder.CustomerId,
+                createdOrder.TotalPrice,
+                createdOrder.CreatedAt,
+                createdOrder.OrderItems.Select(o => new Contracts.OrderItem(
+                    o.OrderItemId,
+                    o.ProductId,
+                    o.Product.ProductName,
+                    o.Quantity,
+                    o.UnitPrice
+                )).ToList()
+            ));
+
             return CreatedAtAction(nameof(GetOrderById),
                 new { orderId = order.OrderId },
                 MapToGetOrderDto(createdOrder));
 
-            // publish event CreateOrderEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
@@ -202,7 +221,7 @@ namespace OrderService.Controllers
                     else
                     {
                         // Add new item
-                        var newItem = new OrderItem
+                        var newItem = new Models.OrderItem
                         {
                             OrderItemId = Guid.NewGuid(),
                             OrderId = order.OrderId,
@@ -229,9 +248,23 @@ namespace OrderService.Controllers
                 .ThenInclude(o => o.Product)
                 .FirstAsync(o => o.OrderId == id);
 
+            // publish event OrderUpdatedEvent
+            await _publishEndpoint.Publish(new OrderUpdatedEvent(
+                updatedOrder.OrderId,
+                updatedOrder.CustomerId,
+                updatedOrder.TotalPrice,
+                updatedOrder.CreatedAt,
+                updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
+                    o.OrderItemId,
+                    o.ProductId,
+                    o.Product.ProductName,
+                    o.Quantity,
+                    o.UnitPrice
+                )).ToList()
+            ));
+
             return Ok(MapToGetOrderDto(updatedOrder));
 
-            // publish event UpdateOrderEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
@@ -245,6 +278,7 @@ namespace OrderService.Controllers
             // check if logged in
             var order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order is null)
@@ -294,7 +328,7 @@ namespace OrderService.Controllers
                 else
                 {
                     // Add new item
-                    _dbContext.OrderItems.Add(new OrderItem
+                    _dbContext.OrderItems.Add(new Models.OrderItem
                     {
                         OrderItemId = Guid.NewGuid(),
                         OrderId = id,
@@ -313,6 +347,21 @@ namespace OrderService.Controllers
                 .ThenInclude(o => o.Product)
                 .FirstAsync(o => o.OrderId == id);
 
+            // publish event OrderUpdatedEvent
+            await _publishEndpoint.Publish(new OrderUpdatedEvent(
+                updatedOrder.OrderId,
+                updatedOrder.CustomerId,
+                updatedOrder.TotalPrice,
+                updatedOrder.CreatedAt,
+                updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
+                    o.OrderItemId,
+                    o.ProductId,
+                    o.Product.ProductName,
+                    o.Quantity,
+                    o.UnitPrice
+                )).ToList()
+            ));
+
             return Ok(MapToGetOrderDto(updatedOrder));
         }
 
@@ -325,6 +374,7 @@ namespace OrderService.Controllers
             // check if logged in
             var order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order is null)
@@ -351,10 +401,22 @@ namespace OrderService.Controllers
             var remainingItems = order.OrderItems.Count - itemsToRemove.Count;
             if (remainingItems == 0)
             {
-                return BadRequest(new { message = "Cannot remove all items from order. Use DELETE /api/Order/{id} to delete the entire order." });
+                // Auto-delete the entire order
+                _dbContext.Orders.Remove(order);
+                await _dbContext.SaveChangesAsync();
+
+                // Publish OrderDeletedEvent
+                await _publishEndpoint.Publish(new OrderCancelledEvent(
+                    order.OrderId,
+                    order.CustomerId,
+                    "Reason", // replace this with better reason after Payment service is added
+                    DateTime.UtcNow 
+                ));
+
+                return Ok(new { message = $"Order with ID {id} is deleted successfully." });
             }
 
-            // Remove the items
+            // Remove only the specified items
             _dbContext.OrderItems.RemoveRange(itemsToRemove);
             await _dbContext.SaveChangesAsync();
 
@@ -363,6 +425,21 @@ namespace OrderService.Controllers
                 .Include(o => o.OrderItems)
                 .ThenInclude(o => o.Product)
                 .FirstAsync(o => o.OrderId == id);
+
+            // publish event OrderUpdatedEvent
+            await _publishEndpoint.Publish(new OrderUpdatedEvent(
+                updatedOrder.OrderId,
+                updatedOrder.CustomerId,
+                updatedOrder.TotalPrice,
+                updatedOrder.CreatedAt,
+                updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
+                    o.OrderItemId,
+                    o.ProductId,
+                    o.Product.ProductName,
+                    o.Quantity,
+                    o.UnitPrice
+                )).ToList()
+            ));
 
             return Ok(MapToGetOrderDto(updatedOrder));
         }
@@ -380,8 +457,15 @@ namespace OrderService.Controllers
             _dbContext.Orders.Remove(order);
             await _dbContext.SaveChangesAsync();
 
+            // Publish OrderDeletedEvent
+                await _publishEndpoint.Publish(new OrderCancelledEvent(
+                    order.OrderId,
+                    order.CustomerId,
+                    "Reason", // replace this with better reason after Payment service is added
+                    DateTime.UtcNow 
+                ));
+
             return Ok(new { message = $"Order with ID {id} is deleted successfully." });
-            // publish event DeleteOrderEvent
 
             // else Return Unathorized({message: "You are not authorized for this action."})
         }

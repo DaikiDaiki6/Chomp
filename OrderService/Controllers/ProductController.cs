@@ -1,3 +1,5 @@
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +14,12 @@ namespace OrderService.Controllers
     public class ProductController : ControllerBase
     {
         private readonly OrdersDbContext _dbContext;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public ProductController(OrdersDbContext dbContext)
+        public ProductController(OrdersDbContext dbContext, IPublishEndpoint publishEndpoint)
         {
             _dbContext = dbContext;
+            _publishEndpoint = publishEndpoint;
             // Serilog Logging
         }
 
@@ -93,11 +97,21 @@ namespace OrderService.Controllers
                 Price = dto.Price,
                 Stock = dto.Stock,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null
+                UpdatedAt = DateTime.UtcNow
             };
 
             _dbContext.Products.Add(product);
             await _dbContext.SaveChangesAsync();
+
+            // publish event CreateProductEvent
+            await _publishEndpoint.Publish(new ProductCreatedEvent(
+                product.ProductId,
+                product.ProductName,
+                product.Price,
+                product.Stock,
+                product.CreatedAt
+            ));
+
             return CreatedAtAction(nameof(GetProductById), new { productId = product.ProductId },
             new ProductDto(
                 product.ProductId,
@@ -106,7 +120,7 @@ namespace OrderService.Controllers
                 product.Stock
             ));
 
-            // publish event CreateProductEvent
+            
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
@@ -163,6 +177,15 @@ namespace OrderService.Controllers
                 await _dbContext.SaveChangesAsync();
             }
 
+            // publish event UpdateProductEvent
+            await _publishEndpoint.Publish(new ProductUpdatedEvent(
+                product.ProductId,
+                product.ProductName,
+                product.Price,
+                product.Stock,
+                product.UpdatedAt
+            ));
+
             return Ok(new ProductDto(
                 product.ProductId,
                 product.ProductName,
@@ -170,7 +193,6 @@ namespace OrderService.Controllers
                 product.Stock
             ));
 
-            // publish event UpdateProductEvent
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
@@ -195,9 +217,15 @@ namespace OrderService.Controllers
             _dbContext.Products.Remove(product);
             await _dbContext.SaveChangesAsync();
 
+            // publish event DeleteProductEvent
+            await _publishEndpoint.Publish(new ProductDeletedEvent(
+                product.ProductId,
+                product.ProductName,
+                DateTime.UtcNow
+            ));
+            
             return Ok(new { message = $"Product with ID {id} was deleted successfully." });
 
-            // publish event DeleteProductEvent
             // else Return Unathorized({message: "You are not authorized for this action."})
         }
     }

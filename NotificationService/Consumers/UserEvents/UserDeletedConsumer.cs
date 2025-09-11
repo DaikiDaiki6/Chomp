@@ -10,8 +10,13 @@ public class UserDeletedConsumer : IConsumer<UserDeletedEvent>
     {
         var message = context.Message;
         
-        Console.WriteLine($"📧 User {message.Username} with ID {message.UserId} is deleted at {message.DeletedAt}");
-        Console.WriteLine($"📧 Other Information: {message.Email} {message.ContactNo}");
+        Console.WriteLine($"🗑️ [USER DELETED] User Account Removed!");
+        Console.WriteLine($"   🆔 User ID: {message.UserId}");
+        Console.WriteLine($"   👨‍💼 Username: {message.Username}");
+        Console.WriteLine($"   📧 Email: {message.Email}");
+        Console.WriteLine($"   📱 Contact: {message.ContactNo}");
+        Console.WriteLine($"   🕒 Deleted At: {message.DeletedAt:yyyy-MM-dd HH:mm:ss}");
+        Console.WriteLine($"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
         await Task.CompletedTask;
     }

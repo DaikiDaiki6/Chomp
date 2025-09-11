@@ -53,10 +53,10 @@ public record OrderCompletedEvent(
 // Reuseable record for nested details
 public record OrderItem(
     Guid OrderItemId,
-    int Quantity,
-    decimal UnitPrice,
     Guid ProductId,
-    string ProductName);
+    string ProductName,
+    int Quantity,
+    decimal UnitPrice);
 
 // ----------------------
 // PRODUCT EVENTS
@@ -77,6 +77,7 @@ public record ProductUpdatedEvent(
 
 public record ProductDeletedEvent(
     Guid ProductId,
+    string ProductName,
     DateTime DeletedAt);
 
 // ----------------------
