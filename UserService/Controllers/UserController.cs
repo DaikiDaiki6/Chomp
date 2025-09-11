@@ -13,6 +13,7 @@ namespace UserService.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        // Check if account is active or banned if banned unauthorized
         private readonly UsersDbContext _dbContext;
         private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<UserController> _logger;
@@ -47,6 +48,7 @@ namespace UserService.Controllers
                 user.Email,
                 user.ContactNo,
                 user.Role,
+                user.AccountStatus,
                 user.CreatedAt,
                 user.UpdatedAt,
                 user.LastSignIn
@@ -59,18 +61,18 @@ namespace UserService.Controllers
         {
             // check if logged in
             // check role 
-            // if user _logger.LogInformation("Getting all users - User {id} Request", id);
-            // if admin _logger.LogInformation("Getting all users - Admin Request");
-            _logger.LogInformation("Getting all users - Admin Request"); //temporary
+            // if user _logger.LogInformation("Getting user - User {id} Request", id);
+            // if admin _logger.LogInformation("Getting user - Admin Request");
+            _logger.LogInformation("Getting user - Admin Request for user {UserId}", id); //temporary
 
             var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
-                _logger.LogWarning("No user {id} found in the database.", id);
+                _logger.LogWarning("No user {UserId} found in the database.", id);
                 return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
 
-            _logger.LogInformation("Successfully retrieved user {id}.", id);
+            _logger.LogInformation("Successfully retrieved user {UserId}.", id);
             return Ok(new GetUserDto(
                 user.UserId,
                 user.Username,
@@ -79,6 +81,7 @@ namespace UserService.Controllers
                 user.Email,
                 user.ContactNo,
                 user.Role,
+                user.AccountStatus,
                 user.CreatedAt,
                 user.UpdatedAt,
                 user.LastSignIn
@@ -90,14 +93,14 @@ namespace UserService.Controllers
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
             // check if logged in
-            _logger.LogInformation("Creating a user."); // add UserId when logged in is added
+            _logger.LogInformation("Creating a user with username {Username}.", dto.Username);
             // Check for duplicates
             var existingUser = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
 
             if (existingUser != null)
             {
-                _logger.LogWarning("User {id} already exists in the database.", existingUser.UserId);
+                _logger.LogWarning("User creation failed - Username {Username} or email {Email} already exists.", dto.Username, dto.Email);
                 return BadRequest(new { errorMessage = "Username or email already exists." });
             }
             var user = new User
@@ -110,6 +113,7 @@ namespace UserService.Controllers
                 Email = dto.Email,
                 ContactNo = dto.ContactNo,
                 Role = Roles.User,
+                AccountStatus = AccountStatus.Active,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 LastSignIn = null
@@ -119,7 +123,7 @@ namespace UserService.Controllers
             await _dbContext.SaveChangesAsync();
 
             // publish event UserCreatedEvent
-            _logger.LogInformation("Created user event for user {id} is passed to the message bus.", user.UserId);
+            _logger.LogInformation("Created user event for user {UserId} is passed to the message bus.", user.UserId);
             await _publishEndpoint.Publish(new UserCreatedEvent(
                 user.UserId,
                 user.Username,
@@ -127,7 +131,7 @@ namespace UserService.Controllers
                 user.ContactNo,
                 user.CreatedAt
             ));
-            _logger.LogInformation("Successfully created user {id}.", user.UserId);
+            _logger.LogInformation("Successfully created user {UserId}.", user.UserId);
             return CreatedAtAction(nameof(GetUserById), new { id = user.UserId },
                 new GetUserDto(
                     user.UserId,
@@ -137,6 +141,7 @@ namespace UserService.Controllers
                     user.Email,
                     user.ContactNo,
                     user.Role,
+                    user.AccountStatus,
                     user.CreatedAt,
                     user.UpdatedAt,
                     user.LastSignIn
@@ -149,14 +154,16 @@ namespace UserService.Controllers
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
             // check if logged in
-            _logger.LogInformation("Updating a user."); // add UserId when logged in is added
+            _logger.LogInformation("Updating user {UserId}.", id);
             var user = await _dbContext.Users.FindAsync(id);
 
             if (user is null)
             {
-                _logger.LogWarning("No user {id} found in the database.", id);
+                _logger.LogWarning("No user {UserId} found in the database.", id);
                 return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
+
+            bool hasChanges = false;
 
             // Check for duplicate username if username is being updated
             if (!string.IsNullOrWhiteSpace(dto.Username) && dto.Username != user.Username)
@@ -165,10 +172,11 @@ namespace UserService.Controllers
                     .FirstOrDefaultAsync(u => u.Username == dto.Username && u.UserId != id);
                 if (existingUserWithUsername != null)
                 {
-                    _logger.LogWarning("Username {username} already exists in the database.", user.Username);
+                    _logger.LogWarning("User update failed - Username {Username} already exists.", dto.Username);
                     return BadRequest(new { errorMessage = "Username already exists." });
                 }
                 user.Username = dto.Username;
+                hasChanges = true;
             }
 
             // Check for duplicate email if email is being updated
@@ -178,43 +186,54 @@ namespace UserService.Controllers
                     .FirstOrDefaultAsync(u => u.Email == dto.Email && u.UserId != id);
                 if (existingUserWithEmail != null)
                 {
-                    _logger.LogWarning("Email {email} already exists in the database.", user.Email);
+                    _logger.LogWarning("User update failed - Email {Email} already exists.", dto.Email);
                     return BadRequest(new { errorMessage = "Email already exists." });
                 }
                 user.Email = dto.Email;
+                hasChanges = true;
             }
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
                 user.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                hasChanges = true;
             }
-            if (!string.IsNullOrWhiteSpace(dto.FirstName))
+            if (!string.IsNullOrWhiteSpace(dto.FirstName) && dto.FirstName != user.FirstName)
             {
                 user.FirstName = dto.FirstName;
+                hasChanges = true;
             }
-            if (!string.IsNullOrWhiteSpace(dto.LastName))
+            if (!string.IsNullOrWhiteSpace(dto.LastName) && dto.LastName != user.LastName)
             {
                 user.LastName = dto.LastName;
+                hasChanges = true;
             }
-            if (!string.IsNullOrWhiteSpace(dto.ContactNo))
+            if (!string.IsNullOrWhiteSpace(dto.ContactNo) && dto.ContactNo != user.ContactNo)
             {
                 user.ContactNo = dto.ContactNo;
+                hasChanges = true;
             }
 
-            user.UpdatedAt = DateTime.UtcNow;
+            if (hasChanges)
+            {
+                user.UpdatedAt = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
 
-            await _dbContext.SaveChangesAsync();
-
-            // publish event UserUpdatedEvent
-            _logger.LogInformation("Updated user event for user {id} is passed to the message bus.", user.UserId);
-            await _publishEndpoint.Publish(new UserUpdatedEvent(
-                user.UserId,
-                user.Username,
-                user.Email,
-                user.ContactNo,
-                user.UpdatedAt
-            )); 
-            _logger.LogInformation("Successfully updated user {id}.", user.UserId);
+                // publish event UserUpdatedEvent
+                _logger.LogInformation("Updated user event for user {UserId} is passed to the message bus.", user.UserId);
+                await _publishEndpoint.Publish(new UserUpdatedEvent(
+                    user.UserId,
+                    user.Username,
+                    user.Email,
+                    user.ContactNo,
+                    user.UpdatedAt
+                ));
+                _logger.LogInformation("Successfully updated user {UserId}.", user.UserId);
+            }
+            else
+            {
+                _logger.LogInformation("No changes detected for user {UserId}.", id);
+            }
             return Ok(new GetUserDto(
                 user.UserId,
                 user.Username,
@@ -223,6 +242,7 @@ namespace UserService.Controllers
                 user.Email,
                 user.ContactNo,
                 user.Role,
+                user.AccountStatus,
                 user.CreatedAt,
                 user.UpdatedAt,
                 user.LastSignIn
@@ -235,11 +255,11 @@ namespace UserService.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             // check if logged in
-            _logger.LogInformation("Deleting a user."); // add UserId when logged in is added
+            _logger.LogInformation("Deleting user {UserId}.", id);
             var user = await _dbContext.Users.FindAsync(id);
             if (user is null)
             {
-                _logger.LogWarning("No user {id} found in the database.", id);
+                _logger.LogWarning("No user {UserId} found in the database.", id);
                 return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
             }
 
@@ -247,15 +267,15 @@ namespace UserService.Controllers
             await _dbContext.SaveChangesAsync();
 
             // publish event UserDeletedEvent
-            _logger.LogInformation("Deleted user event for user {id} is passed to the message bus.", user.UserId);
+            _logger.LogInformation("Deleted user event for user {UserId} is passed to the message bus.", user.UserId);
             await _publishEndpoint.Publish(new UserDeletedEvent(
                 user.UserId,
                 user.Username,
-                user.Email, 
+                user.Email,
                 user.ContactNo,
                 DateTime.UtcNow
-            )); 
-            _logger.LogInformation("Successfully deleted user {id}.", user.UserId);
+            ));
+            _logger.LogInformation("Successfully deleted user {UserId}.", user.UserId);
             return Ok(new { errorMessage = $"User with ID {id} is deleted successfully." });
             // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }

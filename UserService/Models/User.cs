@@ -7,6 +7,11 @@ public enum Roles
     User,
     Admin
 }
+public enum AccountStatus
+{
+    Active,
+    Banned
+}
 public class User
 {
     public Guid UserId { get; set; }
@@ -17,6 +22,7 @@ public class User
     public string Email { get; set; } = string.Empty;
     public string ContactNo { get; set; } = string.Empty;
     public Roles Role { get; set; } = Roles.User;
+    public AccountStatus AccountStatus { get; set; } = AccountStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastSignIn { get; set; } = DateTime.UtcNow;

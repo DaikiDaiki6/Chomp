@@ -12,6 +12,7 @@ public record GetUserDto
     string Email,
     string ContactNo,
     Roles Role,
+    AccountStatus AccountStatus,
     DateTime CreatedAt,
     DateTime UpdatedAt,
     DateTime? LastSignIn
