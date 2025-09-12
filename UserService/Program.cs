@@ -5,10 +5,10 @@ using UserService.Data;
 using UserService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
-// Logging
+// Logging Service
 builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration));
-// Services
+// Other Services
 builder.Services.AddDbContext<UsersDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("ChompUsersDb")));
 builder.Services.AddControllers();
@@ -24,7 +24,7 @@ builder.Services.AddMassTransit(x =>
 );
 
 var app = builder.Build();
-// global exception handling for (mainly) controllers but also all services
+// Global Exception handling - used mainly for controller but can be used globally
 app.UseExceptionHandling();
 app.UseHttpsRedirection();
 app.UseAuthorization();
