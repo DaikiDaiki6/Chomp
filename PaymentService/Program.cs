@@ -7,7 +7,6 @@ using PaymentService.Consumers;
 using PaymentService.Data;
 using Serilog;
 
-// Configure Serilog from appsettings.json
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
@@ -22,13 +21,12 @@ try
     Log.Information("Starting PaymentService host");
 
     var builder = Host.CreateDefaultBuilder(args)
-        .UseSerilog() // Add Serilog
+        .UseSerilog() 
     .ConfigureServices((context, services) =>
     {
         services.AddDbContext<PaymentDbContext>(opt =>
             opt.UseNpgsql(context.Configuration.GetConnectionString("ChompPaymentDb")));
 
-        // Configure MassTransit properly
         services.AddMassTransit(x =>
         {
             x.AddConsumer<OrderConfirmedConsumer>();

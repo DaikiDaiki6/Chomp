@@ -3,15 +3,23 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Consumers;
 using OrderService.Data;
 using OrderService.Middleware;
+using OrderService.Services;
+using OrderService.Services.Interfaces;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 // Logging
 builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration));
+
 // Services
 builder.Services.AddDbContext<OrdersDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("ChompOrdersDb")));
+
+// Register service layer
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using UserService.Data;
 using UserService.Middleware;
+using UserService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 // Logging Service
@@ -20,8 +21,9 @@ builder.Services.AddMassTransit(x =>
     {
         config.Host("rabbitmq://localhost");
     });
-}
-);
+});
+// Register service layer
+builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
 
 var app = builder.Build();
 // Global Exception handling - used mainly for controller but can be used globally

@@ -28,59 +28,54 @@ namespace UserService.Controllers
         [HttpGet] // Role Admin only
         public async Task<IActionResult> GetAll() //From UserInfo
         {
-            // check if loggedin 
-            _logger.LogInformation("GetAll endpoint called by: {UserId}", Guid.NewGuid()); //# Add userId here later when log in is added
+            _logger.LogInformation("GetAll endpoint called");
 
-            // if(User.Role == Admin) do this 
-            var allUsers = await _userService.GetAllAsync();
-
-            if (allUsers.Count == 0)
+            try
             {
-                _logger.LogWarning("No users found in the database.");
-                return NotFound(new { errorMessage = "There are no users in the database." });
+                var allUsers = await _userService.GetAllAsync();
+                return Ok(allUsers);
             }
-
-            _logger.LogInformation("Successfully retrieved {UserCount} users.", allUsers.Count);
-            return Ok(allUsers);
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning("No users found: {ErrorMessage}", ex.Message);
+                return NotFound(new { errorMessage = ex.Message });
+            }
             // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpGet("{id:guid}")] // mainly for Admin -- can be abused (User can use it too)
         public async Task<IActionResult> GetUserById(Guid id)
         {
-            // check if logged in
-            // check role 
-            // if user _logger.LogInformation("Getting user - User {id} Request", id);
-            // if admin _logger.LogInformation("Getting user - Admin Request");
-            _logger.LogInformation("GetUserById endpoint called by {UserId} - Admin Request", id); //temporary
+            _logger.LogInformation("GetUserById endpoint called for user: {UserId}", id);
 
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user is null)
+            try
             {
-                _logger.LogWarning("No user {UserId} found in the database.", id);
-                return NotFound(new { errorMessage = $"There is no user with ID {id} in the database." });
+                var user = await _userService.GetUserByIdAsync(id);
+                return Ok(user);
             }
-
-            return Ok(user);
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning("User not found: {ErrorMessage}", ex.Message);
+                return NotFound(new { errorMessage = ex.Message });
+            }
             // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
-            // check if logged in
             _logger.LogInformation("CreateUser endpoint called for username: {Username}", dto.Username);
-            // Check for duplicates
+
             try
             {
                 var newUser = await _userService.CreateUserAsync(dto);
-                _logger.LogInformation("User creation endpoint completed successfully for: {UserId}", newUser.UserId);
+                _logger.LogInformation("User creation completed successfully for: {UserId}", newUser.UserId);
 
                 return CreatedAtAction(nameof(GetUserById), new { id = newUser.UserId }, newUser);
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning("User creation endpoint failed: {ErrorMessage}", ex.Message);
+                _logger.LogWarning("User creation failed: {ErrorMessage}", ex.Message);
                 return BadRequest(new { errorMessage = ex.Message });
             }
 
@@ -90,22 +85,22 @@ namespace UserService.Controllers
         [HttpPatch("{id:guid}")]
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
-            // check if logged in
-            _logger.LogInformation("EditUserInfo endpoint called for user with user ID: {ID}", id);
+            _logger.LogInformation("EditUserInfo endpoint called for user: {UserId}", id);
 
             try
             {
                 var user = await _userService.EditUserInfoAsync(id, dto);
+                _logger.LogInformation("User update completed successfully for: {UserId}", id);
                 return Ok(user);
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning("User update endpoint failed: {ErrorMessage}", ex.Message);
+                _logger.LogWarning("User not found during update: {ErrorMessage}", ex.Message);
                 return NotFound(new { errorMessage = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogWarning("User update endpoint failed: {ErrorMessage}", ex.Message);
+                _logger.LogWarning("User update failed: {ErrorMessage}", ex.Message);
                 return BadRequest(new { errorMessage = ex.Message });
             }
             // else Return Unathorized({errorMessage: "You are not authorized for this action."})
@@ -114,15 +109,20 @@ namespace UserService.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            // check if logged in
-            _logger.LogInformation("Deleting endpoint called by: {UserId}", Guid.NewGuid()); //# Add userId here later when log in is added
+            _logger.LogInformation("DeleteUser endpoint called for user: {UserId}", id);
 
-            var userDeleted = await _userService.DeleteUserAsync(id);
-            if (userDeleted)
+            try
             {
-                return Ok(new { Message = $"User with ID {id} is deleted successfully." });
+                await _userService.DeleteUserAsync(id);
+                _logger.LogInformation("User deletion completed successfully for: {UserId}", id);
+                
+                return NoContent(); 
             }
-            return NotFound(new { errorMessage = $"There are no user with ID {id} in the database." });
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning("User not found during deletion: {ErrorMessage}", ex.Message);
+                return NotFound(new { errorMessage = ex.Message });
+            }
             // else Return Unathorized({errorMessage: "You are not authorized for this action."})
         }
     }

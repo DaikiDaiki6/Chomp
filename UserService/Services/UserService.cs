@@ -25,8 +25,6 @@ public class UserService : IUserService
     }
     public async Task<GetUserDto> CreateUserAsync(CreateUserDto dto)
     {
-        _logger.LogInformation("Creating new user with username: {Username}", dto.Username);
-
         var existingUser = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Username == dto.Username || u.Email == dto.Email);
 
@@ -34,12 +32,10 @@ public class UserService : IUserService
         {
             if (existingUser.Username == dto.Username)
             {
-                _logger.LogWarning("User creation failed - username already exists: {Username}", dto.Username);
                 throw new InvalidOperationException("A user with that username already exists.");
             }
             else
             {
-                _logger.LogWarning("User creation failed - email already exists: {Email}", dto.Email);
                 throw new InvalidOperationException("A user with that email already exists.");
             }
         }
@@ -63,9 +59,7 @@ public class UserService : IUserService
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
-        _logger.LogInformation("Successfully created user: {Username} (ID: {UserId})", user.Username, user.UserId);
-
-        // publish event UserCreatedEvent
+        // Publish event
         await _publishEndpoint.Publish(new UserCreatedEvent(
             user.UserId,
             user.Username,
@@ -74,27 +68,23 @@ public class UserService : IUserService
             user.CreatedAt
         ));
 
-        _logger.LogInformation("Published UserCreatedEvent for user: {UserId}", user.UserId);
+        _logger.LogInformation("Successfully created user: {Username} (ID: {UserId})", user.Username, user.UserId);
 
-        // Use UserProjection as a lambda function to get GetUserDto
         return UserProjection.Compile()(user);
     }
 
-    public async Task<bool> DeleteUserAsync(Guid id)
+    public async Task DeleteUserAsync(Guid id)
     {
-        _logger.LogInformation("Deleting user with ID: {ID}", id);
-
         var user = await _dbContext.Users.FindAsync(id);
         if (user is null)
         {
-            _logger.LogWarning("User deletion failed - user with ID does not exist in the database: {ID}", id);
-            return false;
+            throw new KeyNotFoundException($"There is no user with ID {id} in the database.");
         }
 
         _dbContext.Users.Remove(user);
         await _dbContext.SaveChangesAsync();
 
-        // publish event UserDeletedEvent
+        // Publish event
         await _publishEndpoint.Publish(new UserDeletedEvent(
             user.UserId,
             user.Username,
@@ -103,19 +93,14 @@ public class UserService : IUserService
             DateTime.UtcNow
         ));
 
-        _logger.LogInformation("Published UserDeletedEvent for user: {UserId}", user.UserId);
-
-        return true;
+        _logger.LogInformation("Successfully deleted user: {UserId}", user.UserId);
     }
 
     public async Task<GetUserDto> EditUserInfoAsync(Guid id, EditUserDto dto)
     {
-        _logger.LogInformation("Editing user with user ID: {ID}", id);
-
         var user = await _dbContext.Users.FindAsync(id);
         if (user is null)
         {
-            _logger.LogWarning("User update failed - user not found with ID: {UserId}", id);
             throw new KeyNotFoundException($"There is no user with ID {id} in the database.");
         }
 
@@ -130,12 +115,10 @@ public class UserService : IUserService
         // Check for duplicate username and email
         if (duplicates.Any(d => d.Username == dto.Username))
         {
-            _logger.LogWarning("User update failed - Username {Username} already exists.", dto.Username);
             throw new InvalidOperationException("Username already exists.");
         }
         if (duplicates.Any(d => d.Email == dto.Email))
         {
-            _logger.LogWarning("User update failed - Email {Email} already exists.", dto.Email);
             throw new InvalidOperationException("Email already exists.");
         }
         
@@ -175,7 +158,7 @@ public class UserService : IUserService
             user.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync();
 
-            // publish event UserUpdatedEvent
+            // Publish event
             await _publishEndpoint.Publish(new UserUpdatedEvent(
                 user.UserId,
                 user.Username,
@@ -183,43 +166,37 @@ public class UserService : IUserService
                 user.ContactNo,
                 user.UpdatedAt
             ));
-            _logger.LogInformation("Published UserUpdatedEvent for user: {UserId}", user.UserId);
-            _logger.LogInformation("Successfully updated user {UserId}.", user.UserId);
-        }
-        else
-        {
-            _logger.LogInformation("No changes detected for user {UserId}.", id);
+            _logger.LogInformation("Successfully updated user {UserId}", user.UserId);
         }
 
-        // Use UserProjection as a lambda function to get GetUserDto
         return UserProjection.Compile()(user);
     }
 
     public async Task<List<GetUserDto>> GetAllAsync()
     {
-         _logger.LogInformation("Getting all users in the database.");
-
         var allUsers = await _dbContext.Users
             .Select(UserProjection)
             .ToListAsync();
 
-        _logger.LogInformation("Successfully retrieved all the users.");
+        if (allUsers.Count == 0)
+        {
+            throw new KeyNotFoundException("There are no users in the database.");
+        }
 
-        // returns List or [] if no value
         return allUsers;
     }
 
-    public async Task<GetUserDto?> GetUserByIdAsync(Guid id)
+    public async Task<GetUserDto> GetUserByIdAsync(Guid id)
     {
-        _logger.LogInformation("Getting user with ID: {id} in the database.", id);
-
         var user = await _dbContext.Users
             .Select(UserProjection)
             .FirstOrDefaultAsync(user => user.UserId == id);
 
-        _logger.LogInformation("Successfully retrieved the user with ID: {id}.", id);
+        if (user is null)
+        {
+            throw new KeyNotFoundException($"There is no user with ID {id} in the database.");
+        }
 
-        // returns GetUserDto or null
         return user;
     }
 
