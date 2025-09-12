@@ -7,7 +7,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 // Logging
-builder.Host.UseSerilog((context, config) => 
+builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration));
 // Services
 builder.Services.AddDbContext<OrdersDbContext>(opt =>
@@ -44,6 +44,20 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
+
+try
+{
+    Log.Information("Starting up {ServiceName}", builder.Environment.ApplicationName);
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "OrderService host terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
+
 
 

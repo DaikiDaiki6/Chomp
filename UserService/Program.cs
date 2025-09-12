@@ -14,7 +14,7 @@ builder.Services.AddDbContext<UsersDbContext>(opt =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMassTransit( x =>
+builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, config) =>
     {
@@ -25,7 +25,7 @@ builder.Services.AddMassTransit( x =>
 
 var app = builder.Build();
 // global exception handling for (mainly) controllers but also all services
-app.UseExceptionHandling(); 
+app.UseExceptionHandling();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 if (app.Environment.IsDevelopment())
@@ -42,9 +42,9 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application start up failed");
+    Log.Fatal(ex, "UserService host terminated unexpectedly");
 }
 finally
 {
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync();
 }

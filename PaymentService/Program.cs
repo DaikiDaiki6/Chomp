@@ -5,8 +5,24 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PaymentService.Consumers;
 using PaymentService.Data;
+using Serilog;
 
-var builder = Host.CreateDefaultBuilder(args)
+// Configure Serilog from appsettings.json
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", true) // for Production
+    .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+try
+{
+    Log.Information("Starting PaymentService host");
+
+    var builder = Host.CreateDefaultBuilder(args)
+        .UseSerilog() // Add Serilog
     .ConfigureServices((context, services) =>
     {
         services.AddDbContext<PaymentDbContext>(opt =>
@@ -29,4 +45,13 @@ var builder = Host.CreateDefaultBuilder(args)
         });
     });
 
-await builder.Build().RunAsync();
+    await builder.Build().RunAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "PaymentService host terminated unexpectedly");
+}
+finally
+{
+    await Log.CloseAndFlushAsync();
+}
