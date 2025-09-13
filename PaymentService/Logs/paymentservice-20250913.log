@@ -1,0 +1,8 @@
+[2025-09-13 08:43:50.131 +08:00 INF Starting PaymentService host {}
+][2025-09-13 08:43:51.015 +08:00 INF Configured endpoint payment-service, Consumer: PaymentService.Consumers.OrderConfirmedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:51.118 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:51.120 +08:00 INF Hosting environment: Production {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:51.122 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\PaymentService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:51.503 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:48:51.558 +08:00 INF Usage Telemetry: {"id":"180f0000-fb3f-2056-5a52-08ddf25e9bb7","created":"2025-09-13T08:43:50.9811426\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-13T08:43:50.9828380\u002B08:00","configured":"2025-09-13T08:43:51.0930182\u002B08:00","started":"2025-09-13T08:43:51.5028354\u002B08:00","name":"IBus","endpoints":[{"name":"payment-service","type":"RabbitMQ","prefetch_count":16,"consumer_count":1,"message_count":1},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+]

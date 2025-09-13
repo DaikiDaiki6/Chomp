@@ -17,6 +17,7 @@ public class Order
     public decimal TotalPrice => OrderItems?.Sum(item => item.TotalPrice) ?? 0;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
     // Navigation propery to OrderItem table

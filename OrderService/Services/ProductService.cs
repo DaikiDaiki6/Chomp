@@ -187,8 +187,9 @@ public class ProductService : IProductService
     public async Task<ProductDto> GetProductByIdAsync(Guid productId)
     {
         var product = await _dbContext.Products
+            .Where(o => o.ProductId == productId)
             .Select(ProductProjection)
-            .FirstOrDefaultAsync(o => o.ProductId == productId);
+            .FirstOrDefaultAsync();
         if (product is null)
         {
             throw new KeyNotFoundException($"There is no product with ID {productId} in the database.");

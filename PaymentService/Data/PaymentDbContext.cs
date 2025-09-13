@@ -14,7 +14,6 @@ public class PaymentDbContext : DbContext
 }
 
 // For console creation of DbContext
-
 public class PaymentDbContextFactory : IDesignTimeDbContextFactory<PaymentDbContext>
 {
     public PaymentDbContext CreateDbContext(string[] args)
@@ -22,7 +21,7 @@ public class PaymentDbContextFactory : IDesignTimeDbContextFactory<PaymentDbCont
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
-            .AddJsonFile("appsettings.Development.json", optional: true)  // Add this!
+            .AddJsonFile("appsettings.Development.json", optional: true) 
             .Build();
 
         var optionsBuilder = new DbContextOptionsBuilder<PaymentDbContext>();

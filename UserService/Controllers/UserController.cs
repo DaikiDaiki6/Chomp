@@ -107,7 +107,7 @@ namespace UserService.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id) //# add timer for deletion cancel (7 days or something) like in normal social medias
         {
             _logger.LogInformation("DeleteUser endpoint called for user: {UserId}", id);
 

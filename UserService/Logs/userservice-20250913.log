@@ -1,0 +1,292 @@
+[2025-09-13 08:42:55.855 +08:00 INF Starting up UserService {}
+][2025-09-13 08:42:56.092 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:56.100 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:56.102 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:56.104 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:56.210 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:06.805 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:06.855 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:36.565 +08:00 INF Starting up UserService {}
+][2025-09-13 08:43:36.747 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:36.754 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:36.757 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:36.758 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:36.844 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:44:17.898 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFIBQLRFNJK:00000001","RequestPath":"/","ConnectionId":"0HNFIBQLRFNJK"}
+][2025-09-13 08:44:27.307 +08:00 INF GetAll endpoint called {"SourceContext":"UserService.Controllers.UserController","ActionId":"a914975a-1112-4f18-9dd6-69604f7a3ebd","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIBQLRFNJL:00000003","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+][2025-09-13 08:44:28.404 +08:00 ERR Failed executing DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT u."UserId", u."Username", u."FirstName", u."LastName", u."Email", u."ContactNo", u."Role", u."AccountStatus", u."CreatedAt", u."UpdatedAt", u."LastSignIn"
+FROM "Users" AS u {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"a914975a-1112-4f18-9dd6-69604f7a3ebd","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIBQLRFNJL:00000003","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+][2025-09-13 08:44:28.432 +08:00 ERR An exception occurred while iterating over the results of a query for context type 'UserService.Data.UsersDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 99
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 99
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"a914975a-1112-4f18-9dd6-69604f7a3ebd","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIBQLRFNJL:00000003","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 99
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 99
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-13 08:44:28.455 +08:00 ERR Unhandled exception occurred while processing /api/User {"RequestId":"0HNFIBQLRFNJL:00000003","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 99
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at UserService.Services.UserService.GetAllAsync() in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Services\UserService.cs:line 177
+   at UserService.Controllers.UserController.GetAll() in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Controllers\UserController.cs:line 35
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at UserService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 99
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-13 08:45:43.415 +08:00 INF CreateUser endpoint called for username: Daikid {"SourceContext":"UserService.Controllers.UserController","ActionId":"da483e21-54c8-4b9f-92db-f33c0835f629","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBQLRFNJL:00000004","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+][2025-09-13 08:45:43.675 +08:00 ERR Failed executing DbCommand (29ms) [Parameters=[@__dto_Username_0='?', @__dto_Email_1='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."UserId", u."AccountStatus", u."ContactNo", u."CreatedAt", u."Email", u."FirstName", u."LastName", u."LastSignIn", u."Password", u."Role", u."UpdatedAt", u."Username"
+FROM "Users" AS u
+WHERE u."Username" = @__dto_Username_0 OR u."Email" = @__dto_Email_1
+LIMIT 1 {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"da483e21-54c8-4b9f-92db-f33c0835f629","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBQLRFNJL:00000004","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+][2025-09-13 08:45:43.684 +08:00 ERR An exception occurred while iterating over the results of a query for context type 'UserService.Data.UsersDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 20
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 20
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"da483e21-54c8-4b9f-92db-f33c0835f629","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBQLRFNJL:00000004","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 20
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 20
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-13 08:45:43.700 +08:00 ERR Unhandled exception occurred while processing /api/User {"RequestId":"0HNFIBQLRFNJL:00000004","RequestPath":"/api/User","ConnectionId":"0HNFIBQLRFNJL"}
+Npgsql.PostgresException (0x80004005): 42703: column u.AccountStatus does not exist
+
+POSITION: 20
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync[TSource](IAsyncEnumerable`1 asyncEnumerable, CancellationToken cancellationToken)
+   at UserService.Services.UserService.CreateUserAsync(CreateUserDto dto) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Services\UserService.cs:line 28
+   at UserService.Controllers.UserController.CreateUser(CreateUserDto dto) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Controllers\UserController.cs:line 71
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at UserService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column u.AccountStatus does not exist
+    Position: 20
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-13 08:46:07.966 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:46:08.017 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:48:37.840 +08:00 INF Starting up UserService {}
+][2025-09-13 08:48:38.020 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:48:38.028 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:48:38.029 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:48:38.030 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:48:38.112 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:48:57.389 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFIBT955PE7:00000001","RequestPath":"/api/User","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:48:57.894 +08:00 INF GetAll endpoint called {"SourceContext":"UserService.Controllers.UserController","ActionId":"85558430-73e1-4118-beac-48120928c6b4","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIBT955PE7:00000001","RequestPath":"/api/User","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:49:08.855 +08:00 INF CreateUser endpoint called for username: Daikid {"SourceContext":"UserService.Controllers.UserController","ActionId":"c417ae5e-470b-45f1-8007-f08bab70dddd","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBT955PE7:00000002","RequestPath":"/api/User","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:49:09.508 +08:00 INF Successfully created user: Daikid (ID: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c") {"SourceContext":"UserService.Services.UserService","ActionId":"c417ae5e-470b-45f1-8007-f08bab70dddd","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBT955PE7:00000002","RequestPath":"/api/User","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:49:09.513 +08:00 INF User creation completed successfully for: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"c417ae5e-470b-45f1-8007-f08bab70dddd","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIBT955PE7:00000002","RequestPath":"/api/User","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:49:20.848 +08:00 INF GetUserById endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"70fe3949-e668-45e3-9c37-3a16991c4164","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIBT955PE7:00000003","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIBT955PE7"}
+][2025-09-13 08:49:20.917 +08:00 ERR Unhandled exception occurred while processing /api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c {"RequestId":"0HNFIBT955PE7:00000003","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIBT955PE7"}
+System.InvalidOperationException: The LINQ expression 'DbSet<User>()
+    .Where(u => new GetUserDto(
+        u.UserId, 
+        u.Username, 
+        u.FirstName, 
+        u.LastName, 
+        u.Email, 
+        u.ContactNo, 
+        u.Role, 
+        u.AccountStatus, 
+        u.CreatedAt, 
+        u.UpdatedAt, 
+        u.LastSignIn
+    ).UserId == __id_0)' could not be translated. Either rewrite the query in a form that can be translated, or switch to client evaluation explicitly by inserting a call to 'AsEnumerable', 'AsAsyncEnumerable', 'ToList', or 'ToListAsync'. See https://go.microsoft.com/fwlink/?linkid=2101038 for more information.
+   at Microsoft.EntityFrameworkCore.Query.QueryableMethodTranslatingExpressionVisitor.Translate(Expression expression)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutorExpression[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Query.QueryCompilationContext.CreateQueryExecutor[TResult](Expression query)
+   at Microsoft.EntityFrameworkCore.Storage.Database.CompileQuery[TResult](Expression query, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.CompileQueryCore[TResult](IDatabase database, Expression query, IModel model, Boolean async)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.<>c__DisplayClass11_0`1.<ExecuteCore>b__0()
+   at Microsoft.EntityFrameworkCore.Query.Internal.CompiledQueryCache.GetOrAddQuery[TResult](Object cacheKey, Func`1 compiler)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteCore[TResult](Expression query, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.QueryCompiler.ExecuteAsync[TResult](Expression query, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.EntityQueryProvider.ExecuteAsync[TResult](Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, LambdaExpression expression, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync[TSource](IQueryable`1 source, Expression`1 predicate, CancellationToken cancellationToken)
+   at UserService.Services.UserService.GetUserByIdAsync(Guid id) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Services\UserService.cs:line 191
+   at UserService.Controllers.UserController.GetUserById(Guid id) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Controllers\UserController.cs:line 53
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at UserService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+][2025-09-13 08:53:38.142 +08:00 INF Usage Telemetry: {"id":"ac480000-fb3f-2056-ce1f-08ddf25f46bf","created":"2025-09-13T08:48:37.9269432\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-13T08:48:37.9286176\u002B08:00","configured":"2025-09-13T08:48:37.9658844\u002B08:00","started":"2025-09-13T08:48:38.1111247\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-13 08:53:41.892 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:53:41.936 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:53:46.812 +08:00 INF Starting up UserService {}
+][2025-09-13 08:53:47.006 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:53:47.013 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:53:47.014 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:53:47.015 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:53:47.106 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:57:46.087 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFIC26N9AHR:00000001","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:57:46.202 +08:00 INF GetUserById endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"e6320447-7eed-4118-92fc-3d7f25c3c6eb","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIC26N9AHR:00000001","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:57:58.086 +08:00 INF CreateUser endpoint called for username: Daikid {"SourceContext":"UserService.Controllers.UserController","ActionId":"925e7cdd-8514-4072-9a1b-15064caac8fa","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIC26N9AHR:00000002","RequestPath":"/api/User","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:57:58.210 +08:00 WRN User creation failed: A user with that username already exists. {"SourceContext":"UserService.Controllers.UserController","ActionId":"925e7cdd-8514-4072-9a1b-15064caac8fa","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFIC26N9AHR:00000002","RequestPath":"/api/User","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:02.264 +08:00 INF GetAll endpoint called {"SourceContext":"UserService.Controllers.UserController","ActionId":"d297c2de-041e-495b-8329-8080b8e0b9ee","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIC26N9AHR:00000003","RequestPath":"/api/User","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:13.409 +08:00 INF GetUserById endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5d" {"SourceContext":"UserService.Controllers.UserController","ActionId":"e6320447-7eed-4118-92fc-3d7f25c3c6eb","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIC26N9AHR:00000004","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:13.419 +08:00 WRN User not found: There is no user with ID 74aa2666-f8c8-4576-aefc-1705c3e0ae5d in the database. {"SourceContext":"UserService.Controllers.UserController","ActionId":"e6320447-7eed-4118-92fc-3d7f25c3c6eb","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIC26N9AHR:00000004","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:44.276 +08:00 INF EditUserInfo endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5d" {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:00000006","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:44.326 +08:00 WRN User not found during update: There is no user with ID 74aa2666-f8c8-4576-aefc-1705c3e0ae5d in the database. {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:00000006","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:47.146 +08:00 INF Usage Telemetry: {"id":"283c0000-fb3f-2056-32a3-08ddf25ffeeb","created":"2025-09-13T08:53:46.9120899\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-13T08:53:46.9143347\u002B08:00","configured":"2025-09-13T08:53:46.9521755\u002B08:00","started":"2025-09-13T08:53:47.1049757\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-13 08:58:59.631 +08:00 INF EditUserInfo endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:00000007","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:59.833 +08:00 INF Successfully updated user "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Services.UserService","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:00000007","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:58:59.837 +08:00 INF User update completed successfully for: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:00000007","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:07.082 +08:00 INF DeleteUser endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5d" {"SourceContext":"UserService.Controllers.UserController","ActionId":"8118f480-baa0-4353-b926-815478464f82","ActionName":"UserService.Controllers.UserController.DeleteUser (UserService)","RequestId":"0HNFIC26N9AHR:00000008","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:07.089 +08:00 WRN User not found during deletion: There is no user with ID 74aa2666-f8c8-4576-aefc-1705c3e0ae5d in the database. {"SourceContext":"UserService.Controllers.UserController","ActionId":"8118f480-baa0-4353-b926-815478464f82","ActionName":"UserService.Controllers.UserController.DeleteUser (UserService)","RequestId":"0HNFIC26N9AHR:00000008","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5d","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:11.291 +08:00 INF DeleteUser endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"8118f480-baa0-4353-b926-815478464f82","ActionName":"UserService.Controllers.UserController.DeleteUser (UserService)","RequestId":"0HNFIC26N9AHR:00000009","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:11.337 +08:00 INF Successfully deleted user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Services.UserService","ActionId":"8118f480-baa0-4353-b926-815478464f82","ActionName":"UserService.Controllers.UserController.DeleteUser (UserService)","RequestId":"0HNFIC26N9AHR:00000009","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:11.341 +08:00 INF User deletion completed successfully for: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"8118f480-baa0-4353-b926-815478464f82","ActionName":"UserService.Controllers.UserController.DeleteUser (UserService)","RequestId":"0HNFIC26N9AHR:00000009","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:23.307 +08:00 INF EditUserInfo endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:0000000A","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:23.313 +08:00 WRN User not found during update: There is no user with ID 74aa2666-f8c8-4576-aefc-1705c3e0ae5c in the database. {"SourceContext":"UserService.Controllers.UserController","ActionId":"bf923f28-95c4-47cc-9019-b25d3e5e12e9","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFIC26N9AHR:0000000A","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:28.904 +08:00 INF GetUserById endpoint called for user: "74aa2666-f8c8-4576-aefc-1705c3e0ae5c" {"SourceContext":"UserService.Controllers.UserController","ActionId":"e6320447-7eed-4118-92fc-3d7f25c3c6eb","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIC26N9AHR:0000000B","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:28.912 +08:00 WRN User not found: There is no user with ID 74aa2666-f8c8-4576-aefc-1705c3e0ae5c in the database. {"SourceContext":"UserService.Controllers.UserController","ActionId":"e6320447-7eed-4118-92fc-3d7f25c3c6eb","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFIC26N9AHR:0000000B","RequestPath":"/api/User/74aa2666-f8c8-4576-aefc-1705c3e0ae5c","ConnectionId":"0HNFIC26N9AHR"}
+][2025-09-13 08:59:34.368 +08:00 INF GetAll endpoint called {"SourceContext":"UserService.Controllers.UserController","ActionId":"d297c2de-041e-495b-8329-8080b8e0b9ee","ActionName":"UserService.Controllers.UserController.GetAll (UserService)","RequestId":"0HNFIC26N9AHR:0000000C","RequestPath":"/api/User","ConnectionId":"0HNFIC26N9AHR"}
+]

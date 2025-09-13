@@ -1,0 +1,34 @@
+[2025-09-13 08:42:57.788 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserCreatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.839 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.843 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserEvents.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.847 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductCreatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.851 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.854 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.857 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderPlacedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.862 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.865 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderCancelledConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.868 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.PaymentEvents.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.872 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.PaymentEvents.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:42:57.993 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:57.995 +08:00 INF Hosting environment: Production {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:57.996 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\NotificationService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:42:58.336 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:03.826 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:03.878 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.899 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserCreatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.935 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.938 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.UserEvents.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.943 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductCreatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.947 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.950 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.ProductEvents.ProductDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.953 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderPlacedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.956 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderUpdatedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.962 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.OrderEvents.OrderCancelledConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.966 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.PaymentEvents.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:20.970 +08:00 INF Configured endpoint notification-service, Consumer: NotificationService.Consumers.PaymentEvents.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-13 08:43:21.097 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:21.099 +08:00 INF Hosting environment: Production {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:21.100 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\NotificationService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-13 08:43:21.278 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-13 08:48:21.338 +08:00 INF Usage Telemetry: {"id":"b4160000-fb3f-2056-a2c8-08ddf25e89c3","created":"2025-09-13T08:43:20.8626561\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-13T08:43:20.8667051\u002B08:00","configured":"2025-09-13T08:43:21.0730765\u002B08:00","started":"2025-09-13T08:43:21.2775728\u002B08:00","name":"IBus","endpoints":[{"name":"notification-service","type":"RabbitMQ","prefetch_count":16,"consumer_count":11,"message_count":11},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+]

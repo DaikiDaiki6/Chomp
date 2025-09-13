@@ -11,6 +11,6 @@ public interface IOrderService
     Task<GetOrderDto> ConfirmOrderAsync(Guid id);
     Task<GetOrderDto> EditOrderAsync(Guid id, EditOrderDto dto);
     Task<GetOrderDto> AddOrderItemsAsync(Guid id, List<CreateOrderItemDto> orderItems);
-    Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<Guid> orderItemIds);
+    Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove);
     Task DeleteOrderAsync(Guid id);
 }

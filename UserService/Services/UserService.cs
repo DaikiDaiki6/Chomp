@@ -107,7 +107,7 @@ public class UserService : IUserService
         bool hasChanges = false;
 
         var duplicates = await _dbContext.Users
-            .Where(u => u.UserId != id && 
+            .Where(u => u.UserId != id &&
                         (u.Username == dto.Username || u.Email == dto.Email))
             .Select(u => new { u.Username, u.Email })
             .ToListAsync();
@@ -121,7 +121,7 @@ public class UserService : IUserService
         {
             throw new InvalidOperationException("Email already exists.");
         }
-        
+
         // Update fields
         if (!string.IsNullOrWhiteSpace(dto.Username) && dto.Username != user.Username)
         {
@@ -189,8 +189,9 @@ public class UserService : IUserService
     public async Task<GetUserDto> GetUserByIdAsync(Guid id)
     {
         var user = await _dbContext.Users
+            .Where(u => u.UserId == id)
             .Select(UserProjection)
-            .FirstOrDefaultAsync(user => user.UserId == id);
+            .FirstOrDefaultAsync();
 
         if (user is null)
         {

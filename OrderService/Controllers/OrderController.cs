@@ -163,13 +163,13 @@ namespace OrderService.Controllers
         /// Remove specific items from an order by product IDs.
         /// </summary>
         [HttpDelete("{id:guid}/items")]
-        public async Task<IActionResult> RemoveOrderItems(Guid id, List<Guid> productIdsToRemove)
+        public async Task<IActionResult> RemoveOrderItems(Guid id, List<RemoveOrderItemDto> itemsToRemove)
         {
             // check if logged in
             _logger.LogInformation("Removing items from order {OrderId}.", id);
             try
             {
-                var orders = await _orderService.RemoveOrderItemsAsync(id, productIdsToRemove);
+                var orders = await _orderService.RemoveOrderItemsAsync(id, itemsToRemove);
                 return Ok(orders);
             }
             catch (KeyNotFoundException ex)
@@ -198,30 +198,6 @@ namespace OrderService.Controllers
             }
 
             // else Return Unathorized({message: "You are not authorized for this action."})
-        }
-
-        // Helper method to reduce code duplication
-        private static GetOrderDto MapToGetOrderDto(Order order)
-        {
-            return new GetOrderDto(
-                order.OrderId,
-                order.CustomerId,
-                order.TotalPrice,
-                order.CreatedAt,
-                order.Status,
-                order.OrderItems.Select(e => new GetOrderItemDto(
-                    e.OrderItemId,
-                    e.Quantity,
-                    e.UnitPrice,
-                    new ProductDto(
-                        e.Product.ProductId,
-                        e.Product.ProductName,
-                        e.Product.Price,
-                        e.Product.Stock
-                    ),
-                    e.TotalPrice
-                )).ToList()
-            );
         }
     }
 }

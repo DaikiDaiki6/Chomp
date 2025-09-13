@@ -204,6 +204,12 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
         }
 
+        if (order.Status != OrderStatus.Pending)
+        {
+            _logger.LogWarning("Order Edit failed - Order {OrderId} is already {Status}.", id, order.Status);
+            throw new InvalidOperationException($"Order is already {order.Status}. Only pending orders can be edited.");
+        }
+
         bool hasChanges = false;
 
         if (dto.OrderItems != null && dto.OrderItems.Count > 0)
@@ -335,6 +341,12 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"There are no order with ID {id} in the database.");
         }
 
+        if (order.Status != OrderStatus.Pending)
+        {
+            _logger.LogWarning("Order Item Addition failed - Order {OrderId} is already {Status}.", id, order.Status);
+            throw new InvalidOperationException($"Order is already {order.Status}. Only pending orders can be modified.");
+        }
+
         if (newItems == null || newItems.Count == 0)
         {
             _logger.LogWarning("Add items failed - No items provided for order {OrderId}.", id);
@@ -431,7 +443,7 @@ public class OrderService : IOrderService
         return MapToGetOrderDto(updatedOrder);
     }
 
-    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<Guid> productIdsToRemove)
+    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove)
     {
         var order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
@@ -444,88 +456,143 @@ public class OrderService : IOrderService
             throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
         }
 
-        if (productIdsToRemove == null || productIdsToRemove.Count == 0)
+        if (order.Status != OrderStatus.Pending)
         {
-            _logger.LogWarning("Remove items failed - No product IDs provided for order {OrderId}.", id);
-            throw new InvalidOperationException("At least one product ID must be provided.");
+            _logger.LogWarning("Order Item Removing failed - Order {OrderId} is already {Status}.", id, order.Status);
+            throw new InvalidOperationException($"Order is already {order.Status}. Only pending orders can be modified.");
         }
 
-            _logger.LogInformation("Attempting to remove {ProductCount} product(s) from order {OrderId}: {ProductIds}",
-                productIdsToRemove.Count, id, string.Join(",", productIdsToRemove));
+        if (itemsToRemove == null || itemsToRemove.Count == 0)
+        {
+            _logger.LogWarning("Remove items failed - No items provided for order {OrderId}.", id);
+            throw new InvalidOperationException("At least one item must be provided.");
+        }
 
-            // Find items to remove
-            var itemsToRemove = order.OrderItems
-                .Where(oi => productIdsToRemove.Contains(oi.ProductId))
-                .ToList();
+        // Filter valid items (quantity > 0)
+        var validItems = itemsToRemove.Where(item => item.Quantity > 0).ToList();
+        if (validItems.Count == 0)
+        {
+            _logger.LogWarning("Remove items failed - All items have invalid quantities for order {OrderId}.", id);
+            throw new InvalidOperationException("All items must have quantity greater than 0.");
+        }
 
-            if (itemsToRemove.Count == 0)
+        _logger.LogInformation("Attempting to remove quantities from {ProductCount} product(s) in order {OrderId}",
+            validItems.Count, id);
+
+        var orderItemsToCompletelyRemove = new List<Models.OrderItem>();
+        bool hasChanges = false;
+
+        foreach (var itemToRemove in validItems)
+        {
+            var existingOrderItem = order.OrderItems
+                .FirstOrDefault(oi => oi.ProductId == itemToRemove.ProductId);
+
+            if (existingOrderItem == null)
             {
-                _logger.LogWarning("Remove items failed - No matching items found in order {OrderId} for product IDs: {ProductIds}",
-                    id, string.Join(",", productIdsToRemove));
-                throw new InvalidOperationException("No matching items found to remove.");
+                _logger.LogWarning("Product {ProductId} not found in order {OrderId} - skipping",
+                    itemToRemove.ProductId, id);
+                continue;
             }
 
-            _logger.LogInformation("Found {ItemCount} items to remove from order {OrderId}.", itemsToRemove.Count, id);
-
-            // Check if removing these items would leave the order empty
-            var remainingItems = order.OrderItems.Count - itemsToRemove.Count;
-            if (remainingItems == 0)
+            if (itemToRemove.Quantity >= existingOrderItem.Quantity)
             {
-                _logger.LogInformation("Removing all items from order {OrderId} - auto-deleting entire order.", id);
-                // Auto-delete the entire order
-                _dbContext.Orders.Remove(order);
-                await _dbContext.SaveChangesAsync();
-
-                // Publish OrderDeletedEvent
-                _logger.LogInformation("Deleted order event for order {OrderId} is passed to the message bus.", id);
-                await _publishEndpoint.Publish(new OrderCancelledEvent(
-                    order.OrderId,
-                    order.CustomerId,
-                    "All items removed from order",
-                    DateTime.UtcNow
-                ));
-                _logger.LogInformation("Successfully deleted order {OrderId} (all items removed).", id);
-                return MapToGetOrderDto(order);
+                // Remove entire item if quantity to remove >= current quantity
+                _logger.LogInformation("Removing entire order item for product {ProductId} from order {OrderId} (requested: {RequestedQuantity}, current: {CurrentQuantity})",
+                    itemToRemove.ProductId, id, itemToRemove.Quantity, existingOrderItem.Quantity);
+                orderItemsToCompletelyRemove.Add(existingOrderItem);
+                hasChanges = true;
             }
+            else
+            {
+                // Deduct quantity
+                var oldQuantity = existingOrderItem.Quantity;
+                existingOrderItem.Quantity -= itemToRemove.Quantity;
+                _logger.LogInformation("Reduced quantity for product {ProductId} in order {OrderId}: {OldQuantity} -> {NewQuantity}",
+                    itemToRemove.ProductId, id, oldQuantity, existingOrderItem.Quantity);
+                hasChanges = true;
+            }
+        }
 
-            // Remove only the specified items
-            _logger.LogInformation("Removing {ItemCount} items from order {OrderId}, {RemainingCount} items will remain.",
-                itemsToRemove.Count, id, remainingItems);
-            _dbContext.OrderItems.RemoveRange(itemsToRemove);
+        if (!hasChanges)
+        {
+            _logger.LogWarning("No valid items found to remove from order {OrderId}", id);
+            throw new InvalidOperationException("No matching items found to remove.");
+        }
+
+        // Remove items that need to be completely removed
+        if (orderItemsToCompletelyRemove.Count > 0)
+        {
+            _dbContext.OrderItems.RemoveRange(orderItemsToCompletelyRemove);
+        }
+
+        // Check if order would be empty after changes
+        var remainingItemsCount = order.OrderItems.Count - orderItemsToCompletelyRemove.Count;
+        var hasItemsWithQuantity = order.OrderItems
+            .Where(oi => !orderItemsToCompletelyRemove.Contains(oi))
+            .Any(oi => oi.Quantity > 0);
+
+        if (remainingItemsCount == 0 || !hasItemsWithQuantity)
+        {
+            _logger.LogInformation("Removing all items from order {OrderId} - auto-deleting entire order.", id);
+
+            // Auto-delete the entire order
+            _dbContext.Orders.Remove(order);
             await _dbContext.SaveChangesAsync();
 
-            // Return updated order
-            var updatedOrder = await _dbContext.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(o => o.Product)
-                .FirstAsync(o => o.OrderId == id);
-
-            // publish event OrderUpdatedEvent
-            _logger.LogInformation("Updated order event for order {OrderId} is passed to the message bus.", id);
-            await _publishEndpoint.Publish(new OrderUpdatedEvent(
-                updatedOrder.OrderId,
-                updatedOrder.CustomerId,
-                updatedOrder.TotalPrice,
-                updatedOrder.CreatedAt,
-                updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
-                    o.OrderItemId,
-                    o.ProductId,
-                    o.Product.ProductName,
-                    o.Quantity,
-                    o.UnitPrice
-                )).ToList()
+            // Publish OrderCancelledEvent
+            await _publishEndpoint.Publish(new OrderCancelledEvent(
+                order.OrderId,
+                order.CustomerId,
+                "All items removed from order",
+                DateTime.UtcNow
             ));
-            _logger.LogInformation("Successfully updated order {OrderId}.", id);
-            return MapToGetOrderDto(updatedOrder);
+
+            _logger.LogInformation("Successfully deleted order {OrderId} (all items removed).", id);
+            return MapToGetOrderDto(order);
+        }
+
+        // Save partial changes
+        await _dbContext.SaveChangesAsync();
+
+        // Return updated order
+        var updatedOrder = await _dbContext.Orders
+            .Include(o => o.OrderItems)
+            .ThenInclude(o => o.Product)
+            .FirstAsync(o => o.OrderId == id);
+
+        // Publish OrderUpdatedEvent
+        await _publishEndpoint.Publish(new OrderUpdatedEvent(
+            updatedOrder.OrderId,
+            updatedOrder.CustomerId,
+            updatedOrder.TotalPrice,
+            updatedOrder.CreatedAt,
+            updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
+                o.OrderItemId,
+                o.ProductId,
+                o.Product.ProductName,
+                o.Quantity,
+                o.UnitPrice
+            )).ToList()
+        ));
+
+        _logger.LogInformation("Successfully updated order {OrderId}.", id);
+        return MapToGetOrderDto(updatedOrder);
     }
 
     public async Task DeleteOrderAsync(Guid id)
     {
         var order = await _dbContext.Orders.FindAsync(id);
+
         if (order is null)
         {
             _logger.LogWarning("No order {OrderId} found in the database.", id);
             throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+        }
+
+        if (order.Status != OrderStatus.Pending)
+        {
+            _logger.LogWarning("Order deletion failed - Order {OrderId} is already {Status}.", id, order.Status);
+            throw new InvalidOperationException($"Order is already {order.Status}. Only pending orders can be deleted.");
         }
 
         _dbContext.Orders.Remove(order);
@@ -563,6 +630,7 @@ public class OrderService : IOrderService
             order.CustomerId,
             order.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity), // TotalPrice
             order.CreatedAt,
+            order.UpdatedAt,
             order.Status,
             orderItems
         );

@@ -117,8 +117,8 @@ namespace OrderService.Controllers
             {
                 await _productService.DeleteProductAsync(id);
                 _logger.LogInformation("Product deletion completed successfully for: {ProductId}", id);
-                
-                return Ok(new { message = $"Product with ID {id} is successfully deleted."});
+
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
