@@ -338,7 +338,7 @@ public class OrderService : IOrderService
         if (order is null)
         {
             _logger.LogWarning("No order {OrderId} found in the database.", id);
-            throw new KeyNotFoundException($"There are no order with ID {id} in the database.");
+            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
         }
 
         if (order.Status != OrderStatus.Pending)
