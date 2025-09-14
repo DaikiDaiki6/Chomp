@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using UserService.Data;
 using UserService.DTO;
 using UserService.Models;
+using UserService.Services.Helpers;
 using UserService.Services.Interfaces;
 
 namespace UserService.Services;
@@ -14,13 +15,16 @@ public class UserService : IUserService
 {
     private readonly UsersDbContext _dbContext;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ITokenService _tokenService;
     private readonly ILogger<UserService> _logger;
 
     public UserService(ILogger<UserService> logger,
         UsersDbContext dbContext,
+        ITokenService tokenService,
         IPublishEndpoint publishEndpoint)
     {
         _dbContext = dbContext;
+        _tokenService = tokenService;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
@@ -72,7 +76,7 @@ public class UserService : IUserService
 
         _logger.LogInformation("Successfully created user: {Username} (ID: {UserId})", user.Username, user.UserId);
 
-        return UserProjection.Compile()(user);
+        return UserProjections.ToGetUserDto.Compile()(user);
     }
 
     public async Task DeleteUserAsync(Guid id)
@@ -171,14 +175,14 @@ public class UserService : IUserService
             _logger.LogInformation("Successfully updated user {UserId}", user.UserId);
         }
 
-        return UserProjection.Compile()(user);
+        return UserProjections.ToGetUserDto.Compile()(user);
     }
 
     public async Task<List<GetUserDto>> GetAllAsync()
     {
         var allUsers = await _dbContext.Users
             .Where(u => !u.IsDeleted) // only non-deleted users
-            .Select(UserProjection)
+            .Select(UserProjections.ToGetUserDto)
             .ToListAsync();
 
         if (allUsers.Count == 0)
@@ -193,7 +197,7 @@ public class UserService : IUserService
     {
         var user = await _dbContext.Users
             .Where(u => u.UserId == id && !u.IsDeleted) // only non-deleted users
-            .Select(UserProjection)
+            .Select(UserProjections.ToGetUserDto)
             .FirstOrDefaultAsync();
 
         if (user is null)
@@ -228,14 +232,14 @@ public class UserService : IUserService
         user.AccountStatus = AccountStatus.PendingDeletion;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await RevokeAllRefreshToken(id, "User account deleted");
+        await _tokenService.RevokeAllRefreshTokenAsync(id, "User account deleted");
 
         await _dbContext.SaveChangesAsync();
 
         _logger.LogInformation("Successfully soft deleted user: {UserId}. Permanent deletion scheduled for: {DeletionData}",
             user.UserId, user.PermanentDeletionAt);
 
-        return UserProjection.Compile()(user);
+        return UserProjections.ToGetUserDto.Compile()(user);
     }
 
     public async Task<GetUserDto> RestoreUserAsync(Guid id)
@@ -271,7 +275,7 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
 
         _logger.LogInformation("Successfully restored user: {UserId}", user.UserId);
-        return UserProjection.Compile()(user);
+        return UserProjections.ToGetUserDto.Compile()(user);
     }
 
     public async Task<List<GetUserDto>> GetSoftDeletedUsersAsync()
@@ -280,23 +284,9 @@ public class UserService : IUserService
 
         var deletedUsers = await _dbContext.Users
                                 .Where(u => u.IsDeleted)
-                                .Select(UserProjection)
+                                .Select(UserProjections.ToGetUserDto)
                                 .ToListAsync();
         _logger.LogInformation("Retrieved {Count} deleted users", deletedUsers.Count);
         return deletedUsers;
     }
-
-    private static readonly Expression<Func<User, GetUserDto>> UserProjection = user => new GetUserDto(
-        user.UserId,
-        user.Username,
-        user.FirstName,
-        user.LastName,
-        user.Email,
-        user.ContactNo,
-        user.Role,
-        user.AccountStatus,
-        user.CreatedAt,
-        user.UpdatedAt,
-        user.LastSignIn
-    );
 }

@@ -9,7 +9,7 @@ public class RefreshToken
     public Guid RefreshTokenId { get; set; }
     [Required]
     [MaxLength(500)]
-    public string Token { get; set; } = string.Empty;
+    public string RefreshTokenValue { get; set; } = string.Empty;
     [Required]
     public DateTime ExpiresAt { get; set; }
     [Required]

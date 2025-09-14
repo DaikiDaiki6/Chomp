@@ -57,6 +57,8 @@ builder.Services.AddMassTransit(x =>
 
 // Register service layer
 builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHostedService<UserCleanupService>();
 
 var app = builder.Build();
