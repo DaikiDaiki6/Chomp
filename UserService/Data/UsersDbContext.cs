@@ -22,7 +22,7 @@ public class UsersDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
         // add index for better performance
         modelBuilder.Entity<RefreshToken>()
-            .HasIndex(rt => rt.Token);
+            .HasIndex(rt => rt.RefreshTokenValue);
 
     }
 }

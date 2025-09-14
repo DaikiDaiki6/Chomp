@@ -5,6 +5,6 @@ namespace UserService.DTO;
 
 public record RefreshTokenDto
 (
-    string Token,
+    string AccessToken,
     string RefreshToken
 );

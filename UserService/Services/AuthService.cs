@@ -44,7 +44,7 @@ public class AuthService : IAuthService
 
         if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
         {
-            throw new UnauthorizedAccessException("Invalid Password.");
+            throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
         if (user.AccountStatus != AccountStatus.Active)

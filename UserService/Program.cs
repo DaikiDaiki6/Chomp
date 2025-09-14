@@ -8,6 +8,7 @@ using Serilog;
 using UserService.Data;
 using UserService.Middleware;
 using UserService.Services;
+using UserService.Services.Helpers;
 using UserService.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,6 +60,7 @@ builder.Services.AddMassTransit(x =>
 builder.Services.AddScoped<IUserService, UserService.Services.UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<GetPrincipalFromExpiredToken>();
 builder.Services.AddHostedService<UserCleanupService>();
 
 var app = builder.Build();
