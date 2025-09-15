@@ -1,0 +1,290 @@
+[2025-09-15 21:36:05.414 +08:00 INF Starting up UserService {}
+][2025-09-15 21:36:05.732 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 21:36:06.309 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 21:36:07.892 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:36:07.895 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:36:07.896 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:36:07.898 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:36:10.785 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKBJAIT89L:00000001","RequestPath":"/","ConnectionId":"0HNFKBJAIT89L"}
+][2025-09-15 21:40:43.106 +08:00 INF CreateUser endpoint called for username: Gorel666 {"SourceContext":"UserService.Controllers.UserController","ActionId":"5afa77d5-2c9a-452c-99e6-944b45a53548","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBJAIT89M:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBJAIT89M"}
+][2025-09-15 21:40:43.901 +08:00 INF Successfully created user: Gorel666 (ID: "979eb851-0354-4349-a4bb-3ab47ae9bc92") {"SourceContext":"UserService.Services.UserService","ActionId":"5afa77d5-2c9a-452c-99e6-944b45a53548","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBJAIT89M:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBJAIT89M"}
+][2025-09-15 21:40:43.906 +08:00 INF User creation completed successfully for: "979eb851-0354-4349-a4bb-3ab47ae9bc92" {"SourceContext":"UserService.Controllers.UserController","ActionId":"5afa77d5-2c9a-452c-99e6-944b45a53548","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBJAIT89M:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBJAIT89M"}
+][2025-09-15 21:41:06.329 +08:00 INF Usage Telemetry: {"id":"604d0000-37b1-1901-a643-08ddf45cd216","created":"2025-09-15T21:36:05.5347424\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-15T21:36:05.5364755\u002B08:00","configured":"2025-09-15T21:36:05.6325034\u002B08:00","started":"2025-09-15T21:36:06.3080872\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-15 21:41:16.687 +08:00 ERR Failed executing DbCommand (11ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = DateTime), @p2='?' (DbType = DateTime), @p3='?', @p4='?' (DbType = DateTime), @p5='?', @p6='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("RefreshTokenId", "CreatedAt", "ExpiresAt", "RefreshTokenValue", "RevokedAt", "RevokedReason", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6); {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"92c72aba-cf38-4ef0-bf28-88ba604ae78e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKBJAIT89M:00000002","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKBJAIT89M"}
+][2025-09-15 21:41:16.714 +08:00 ERR An exception occurred in the database while saving changes for context type 'UserService.Data.UsersDbContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+
+POSITION: 74
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+    Position: 74
+    File: parse_target.c
+    Line: 1070
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken) {"EventId":{"Id":10000,"Name":"Microsoft.EntityFrameworkCore.Update.SaveChangesFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Update","ActionId":"92c72aba-cf38-4ef0-bf28-88ba604ae78e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKBJAIT89M:00000002","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKBJAIT89M"}
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+
+POSITION: 74
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+    Position: 74
+    File: parse_target.c
+    Line: 1070
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+][2025-09-15 21:41:16.732 +08:00 ERR Unhandled exception occurred while processing /api/Auth/login {"RequestId":"0HNFKBJAIT89M:00000002","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKBJAIT89M"}
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Npgsql.PostgresException (0x80004005): 42703: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+
+POSITION: 74
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column "RefreshTokenValue" of relation "RefreshTokens" does not exist
+    Position: 74
+    File: parse_target.c
+    Line: 1070
+    Routine: checkInsertTargets
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at UserService.Services.TokenService.GenerateRefreshTokenAsync(Guid userId) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Services\TokenService.cs:line 78
+   at UserService.Controllers.AuthController.Login(LoginDto login) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Controllers\AuthController.cs:line 39
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at UserService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+][2025-09-15 21:41:29.498 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:41:29.505 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 21:41:29.507 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 21:41:29.549 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 21:43:11.163 +08:00 ERR Failed executing DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+ALTER TABLE "Users" ADD "DeletedAt" timestamp with time zone; {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command"}
+][2025-09-15 21:45:51.684 +08:00 ERR An error occurred using the connection to database 'ChompUsersDb' on server 'tcp://localhost:5432'. {"EventId":{"Id":20004,"Name":"Microsoft.EntityFrameworkCore.Database.Connection.ConnectionError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Connection"}
+][2025-09-15 21:51:01.797 +08:00 INF Starting up UserService {}
+][2025-09-15 21:51:01.984 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 21:51:02.113 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 21:51:02.808 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:51:02.811 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:51:02.813 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:51:02.815 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 21:51:07.702 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKBRLSPPTJ:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:51:07.849 +08:00 INF CreateUser endpoint called for username: Gorel666 {"SourceContext":"UserService.Controllers.UserController","ActionId":"1735d497-89cc-44f5-ab9c-8b76a4347616","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBRLSPPTJ:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:51:08.506 +08:00 INF Successfully created user: Gorel666 (ID: "37c9cbbb-f098-45d2-bcc0-a5473cc22928") {"SourceContext":"UserService.Services.UserService","ActionId":"1735d497-89cc-44f5-ab9c-8b76a4347616","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBRLSPPTJ:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:51:08.512 +08:00 INF User creation completed successfully for: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"1735d497-89cc-44f5-ab9c-8b76a4347616","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKBRLSPPTJ:00000001","RequestPath":"/api/User","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:51:15.969 +08:00 INF Generated refresh token for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Services.TokenService","ActionId":"76be3705-bd34-4b0f-b991-42af335a5f86","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKBRLSPPTJ:00000002","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:51:15.973 +08:00 INF User Gorel666 logged in successfully {"SourceContext":"UserService.Controllers.AuthController","ActionId":"76be3705-bd34-4b0f-b991-42af335a5f86","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKBRLSPPTJ:00000002","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKBRLSPPTJ"}
+][2025-09-15 21:56:02.135 +08:00 INF Usage Telemetry: {"id":"14320000-37b1-1901-61de-08ddf45ee85d","created":"2025-09-15T21:51:01.9016383\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-15T21:51:01.9033130\u002B08:00","configured":"2025-09-15T21:51:01.9425139\u002B08:00","started":"2025-09-15T21:51:02.1121061\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-15 22:01:44.326 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:01:44.333 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:01:44.335 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:01:44.376 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:01:52.286 +08:00 INF Starting up UserService {}
+][2025-09-15 22:01:52.472 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:01:52.610 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:01:53.303 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:01:53.305 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:01:53.307 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:01:53.308 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:02:03.505 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKC1PB1O9K:00000001","RequestPath":"/api/User37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC1PB1O9K"}
+][2025-09-15 22:03:27.007 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:03:27.015 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:03:27.016 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:03:27.063 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:03:48.336 +08:00 INF Starting up UserService {}
+][2025-09-15 22:03:48.520 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:03:48.648 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:03:49.351 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:03:49.355 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:03:49.356 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:03:49.358 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:05:29.457 +08:00 INF GetUserById endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"c8ae54df-8e96-4dad-871f-9861973670e6","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFKC2PU8VAR:00000003","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC2PU8VAR"}
+][2025-09-15 22:05:29.462 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"c8ae54df-8e96-4dad-871f-9861973670e6","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFKC2PU8VAR:00000003","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC2PU8VAR"}
+][2025-09-15 22:05:29.470 +08:00 ERR Unhandled exception occurred while processing /api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928 {"RequestId":"0HNFKC2PU8VAR:00000003","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC2PU8VAR"}
+System.InvalidOperationException: No authentication handler is registered for the scheme 'You can only access your own profile unless you are an admin.'. The registered schemes are: Bearer. Did you forget to call AddAuthentication().Add[SomeAuthHandler]("You can only access your own profile unless you are an admin.",...)?
+   at Microsoft.AspNetCore.Authentication.AuthenticationService.ForbidAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+   at Microsoft.AspNetCore.Mvc.ForbidResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at UserService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\UserService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+][2025-09-15 22:08:48.692 +08:00 INF Usage Telemetry: {"id":"74420000-37b1-1901-27a4-08ddf460b142","created":"2025-09-15T22:03:48.4419853\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-15T22:03:48.4436294\u002B08:00","configured":"2025-09-15T22:03:48.4812458\u002B08:00","started":"2025-09-15T22:03:48.6475479\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-15 22:10:04.339 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:10:04.345 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:10:04.346 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:10:04.391 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:10:08.669 +08:00 INF Starting up UserService {}
+][2025-09-15 22:10:08.858 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:10:08.985 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:10:09.706 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:10:09.709 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:10:09.711 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:10:09.714 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:10:17.688 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKC6CJU0NL:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NL"}
+][2025-09-15 22:10:17.784 +08:00 INF GetUserById endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"a889bbac-266e-4865-a247-d00515f4a94d","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFKC6CJU0NL:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NL"}
+][2025-09-15 22:10:17.788 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"a889bbac-266e-4865-a247-d00515f4a94d","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFKC6CJU0NL:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NL"}
+][2025-09-15 22:11:00.948 +08:00 INF Generated refresh token for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Services.TokenService","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NM:00000001","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKC6CJU0NM"}
+][2025-09-15 22:11:00.952 +08:00 INF User Gorel666 logged in successfully {"SourceContext":"UserService.Controllers.AuthController","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NM:00000001","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKC6CJU0NM"}
+][2025-09-15 22:11:24.408 +08:00 INF Generated refresh token for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Services.TokenService","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NM:00000004","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKC6CJU0NM"}
+][2025-09-15 22:11:24.411 +08:00 INF User Gorel666 logged in successfully {"SourceContext":"UserService.Controllers.AuthController","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NM:00000004","RequestPath":"/api/Auth/login","ConnectionId":"0HNFKC6CJU0NM"}
+][2025-09-15 22:12:58.334 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"4fe0ebcb-f74a-46af-9714-c8b64e49c680","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKC6CJU0NP:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:12:58.338 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"4fe0ebcb-f74a-46af-9714-c8b64e49c680","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKC6CJU0NP:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:13:59.311 +08:00 INF Generated refresh token for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Services.TokenService","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NP:00000003","RequestPath":"/api/Auth/Login","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:13:59.315 +08:00 INF User Gorel666 logged in successfully {"SourceContext":"UserService.Controllers.AuthController","ActionId":"50fc0c1b-a587-4724-a9d9-20c61e1f9f4e","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKC6CJU0NP:00000003","RequestPath":"/api/Auth/Login","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:15:00.236 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"4fe0ebcb-f74a-46af-9714-c8b64e49c680","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKC6CJU0NP:00000004","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:15:00.239 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"4fe0ebcb-f74a-46af-9714-c8b64e49c680","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKC6CJU0NP:00000004","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKC6CJU0NP"}
+][2025-09-15 22:15:09.005 +08:00 INF Usage Telemetry: {"id":"9c470000-37b1-1901-7f30-08ddf46193f4","created":"2025-09-15T22:10:08.7758402\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-15T22:10:08.7775694\u002B08:00","configured":"2025-09-15T22:10:08.8172486\u002B08:00","started":"2025-09-15T22:10:08.9846822\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-15 22:18:30.099 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:18:30.104 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:18:30.106 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:18:30.157 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:18:34.499 +08:00 INF Starting up UserService {}
+][2025-09-15 22:18:34.702 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:18:34.837 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:18:35.593 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:18:35.597 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:18:35.598 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:18:35.599 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:18:40.259 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKCB2CQI5R:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCB2CQI5R"}
+][2025-09-15 22:18:40.408 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"2399ad6c-4191-44e6-b0a5-4e1b3301153b","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCB2CQI5R:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCB2CQI5R"}
+][2025-09-15 22:18:40.412 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"2399ad6c-4191-44e6-b0a5-4e1b3301153b","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCB2CQI5R:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCB2CQI5R"}
+][2025-09-15 22:23:09.233 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:23:09.238 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:23:09.240 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:23:09.288 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:23:15.582 +08:00 INF Starting up UserService {}
+][2025-09-15 22:23:15.780 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:23:15.934 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:23:16.853 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:23:16.856 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:23:16.857 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:23:16.859 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:23:31.759 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKCDP8OV4G:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCDP8OV4G"}
+][2025-09-15 22:23:31.954 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"96191cb6-9690-4f1f-825e-7284a72d9e69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCDP8OV4G:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCDP8OV4G"}
+][2025-09-15 22:23:31.959 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"96191cb6-9690-4f1f-825e-7284a72d9e69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCDP8OV4G:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCDP8OV4G"}
+][2025-09-15 22:28:10.588 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:28:10.593 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:28:10.594 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:28:10.636 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:28:21.582 +08:00 INF Starting up UserService {}
+][2025-09-15 22:28:21.769 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:28:21.897 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:28:22.739 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:28:22.741 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:28:22.742 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:28:22.743 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:29:53.904 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKCHB55RUI:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHB55RUI"}
+][2025-09-15 22:29:54.052 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"2ee9800b-59a4-487d-97f7-96d7dba5a958","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHB55RUI:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHB55RUI"}
+][2025-09-15 22:29:54.057 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"2ee9800b-59a4-487d-97f7-96d7dba5a958","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHB55RUI:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHB55RUI"}
+][2025-09-15 22:30:07.011 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:30:07.019 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:30:07.021 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:30:07.062 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:30:12.835 +08:00 INF Starting up UserService {}
+][2025-09-15 22:30:13.018 +08:00 INF User cleanup service started {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:30:13.150 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-15 22:30:13.843 +08:00 INF Now listening on: http://localhost:5240 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:30:13.845 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:30:13.846 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:30:13.848 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\UserService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:30:25.322 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKCHKGQK1F:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHKGQK1F"}
+][2025-09-15 22:30:25.474 +08:00 INF EditUserInfo endpoint called for user: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"7447ae46-74be-4289-a5c1-67237f886d69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHKGQK1F:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHKGQK1F"}
+][2025-09-15 22:30:25.479 +08:00 WRN User attempted to access unauthorized profile: "37c9cbbb-f098-45d2-bcc0-a5473cc22928" {"SourceContext":"UserService.Controllers.UserController","ActionId":"7447ae46-74be-4289-a5c1-67237f886d69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHKGQK1F:00000001","RequestPath":"/api/User/37c9cbbb-f098-45d2-bcc0-a5473cc22928","ConnectionId":"0HNFKCHKGQK1F"}
+][2025-09-15 22:31:28.366 +08:00 INF CreateUser endpoint called for username: string {"SourceContext":"UserService.Controllers.UserController","ActionId":"15eebdf5-72a5-4040-bad5-226395d23c27","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKCHKGQK1G:00000003","RequestPath":"/api/User","ConnectionId":"0HNFKCHKGQK1G"}
+][2025-09-15 22:31:29.004 +08:00 INF Successfully created user: string (ID: "6f668eec-6cd3-4f41-8592-3f7078a5992f") {"SourceContext":"UserService.Services.UserService","ActionId":"15eebdf5-72a5-4040-bad5-226395d23c27","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKCHKGQK1G:00000003","RequestPath":"/api/User","ConnectionId":"0HNFKCHKGQK1G"}
+][2025-09-15 22:31:29.010 +08:00 INF User creation completed successfully for: "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Controllers.UserController","ActionId":"15eebdf5-72a5-4040-bad5-226395d23c27","ActionName":"UserService.Controllers.UserController.CreateUser (UserService)","RequestId":"0HNFKCHKGQK1G:00000003","RequestPath":"/api/User","ConnectionId":"0HNFKCHKGQK1G"}
+][2025-09-15 22:32:59.711 +08:00 INF Generated refresh token for user: "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Services.TokenService","ActionId":"f0fa5bd8-c6ce-4a7b-9c70-495df74d4c03","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKCHKGQK1I:00000001","RequestPath":"/api/auth/login","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:32:59.715 +08:00 INF User string logged in successfully {"SourceContext":"UserService.Controllers.AuthController","ActionId":"f0fa5bd8-c6ce-4a7b-9c70-495df74d4c03","ActionName":"UserService.Controllers.AuthController.Login (UserService)","RequestId":"0HNFKCHKGQK1I:00000001","RequestPath":"/api/auth/login","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:34:36.679 +08:00 INF EditUserInfo endpoint called for user: "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Controllers.UserController","ActionId":"7447ae46-74be-4289-a5c1-67237f886d69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHKGQK1I:00000002","RequestPath":"/api/User/6f668eec-6cd3-4f41-8592-3f7078a5992f","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:34:36.758 +08:00 INF Successfully updated user "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Services.UserService","ActionId":"7447ae46-74be-4289-a5c1-67237f886d69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHKGQK1I:00000002","RequestPath":"/api/User/6f668eec-6cd3-4f41-8592-3f7078a5992f","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:34:36.763 +08:00 INF User update completed successfully for: "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Controllers.UserController","ActionId":"7447ae46-74be-4289-a5c1-67237f886d69","ActionName":"UserService.Controllers.UserController.EditUserInfo (UserService)","RequestId":"0HNFKCHKGQK1I:00000002","RequestPath":"/api/User/6f668eec-6cd3-4f41-8592-3f7078a5992f","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:35:00.324 +08:00 INF GetUserById endpoint called for user: "6f668eec-6cd3-4f41-8592-3f7078a5992f" {"SourceContext":"UserService.Controllers.UserController","ActionId":"5677c7d0-d751-4f33-ad2d-e2980b23d2f5","ActionName":"UserService.Controllers.UserController.GetUserById (UserService)","RequestId":"0HNFKCHKGQK1I:00000003","RequestPath":"/api/User/6f668eec-6cd3-4f41-8592-3f7078a5992f","ConnectionId":"0HNFKCHKGQK1I"}
+][2025-09-15 22:35:13.172 +08:00 INF Usage Telemetry: {"id":"402a0000-37b1-1901-7e0e-08ddf46461b1","created":"2025-09-15T22:30:12.9408240\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-15T22:30:12.9424813\u002B08:00","configured":"2025-09-15T22:30:12.9798610\u002B08:00","started":"2025-09-15T22:30:13.1483076\u002B08:00","name":"IBus","endpoints":[{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-15 22:35:27.797 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-15 22:35:27.804 +08:00 INF User cleanup service was cancelled {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:35:27.805 +08:00 INF User cleanup service stopped {"SourceContext":"UserService.Services.UserCleanupService"}
+][2025-09-15 22:35:27.849 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+]

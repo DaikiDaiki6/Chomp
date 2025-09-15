@@ -14,7 +14,7 @@ public static class CanModifyUserHelper
         {
             return true;
         }
-
+        Console.WriteLine($"{currentUserIdClaim} == {targetUserId}");
         if (Guid.TryParse(currentUserIdClaim, out var currentUserId))
         {
             return currentUserId == targetUserId;

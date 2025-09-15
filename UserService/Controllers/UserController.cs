@@ -55,7 +55,7 @@ namespace UserService.Controllers
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);
-                return Forbid("You can only access your own profile unless you are an admin.");
+                return Unauthorized("You can only access your own profile unless you are an admin.");
             }
 
             try
@@ -96,11 +96,14 @@ namespace UserService.Controllers
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
             _logger.LogInformation("EditUserInfo endpoint called for user: {UserId}", id);
-
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"{claim.Type}: {claim.Value}");
+            }
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);
-                return Forbid("You can only modify your own profile unless you are an admin.");
+                return Unauthorized("You can only modify your own profile unless you are an admin.");
             }
 
             try
@@ -150,7 +153,7 @@ namespace UserService.Controllers
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);
-                return Forbid("You can only delete your own account unless you are an admin.");
+                return Unauthorized("You can only delete your own account unless you are an admin.");
             }
 
             try
@@ -186,7 +189,7 @@ namespace UserService.Controllers
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);
-                return Forbid("You can only restore your own account unless you are an admin.");
+                return Unauthorized("You can only restore your own account unless you are an admin.");
             }
 
             try
