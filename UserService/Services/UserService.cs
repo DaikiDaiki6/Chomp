@@ -31,23 +31,26 @@ public class UserService : IUserService
 
     public async Task<GetUserDto> CreateUserAsync(CreateUserDto dto)
     {
-        var existingUser = await _dbContext.Users
-            .FirstOrDefaultAsync(u => (u.Username == dto.Username || u.Email == dto.Email) && !u.IsDeleted);
-
-        if (existingUser != null)
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            if (existingUser.Username == dto.Username)
-            {
-                throw new InvalidOperationException("A user with that username already exists.");
-            }
-            else
-            {
-                throw new InvalidOperationException("A user with that email already exists.");
-            }
-        }
+            var existingUser = await _dbContext.Users
+                .FirstOrDefaultAsync(u => (u.Username == dto.Username || u.Email == dto.Email) && !u.IsDeleted);
 
-        var user = new User
-        {
+            if (existingUser != null)
+            {
+                if (existingUser.Username == dto.Username)
+                {
+                    throw new InvalidOperationException("A user with that username already exists.");
+                }
+                else
+                {
+                    throw new InvalidOperationException("A user with that email already exists.");
+                }
+            }
+
+            var user = new User
+            {
             UserId = Guid.NewGuid(),
             Username = dto.Username,
             Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
@@ -74,32 +77,55 @@ public class UserService : IUserService
             user.CreatedAt
         ));
 
+        await transaction.CommitAsync();
+        
         _logger.LogInformation("Successfully created user: {Username} (ID: {UserId})", user.Username, user.UserId);
 
         return UserProjections.ToGetUserDto.Compile()(user);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task DeleteUserAsync(Guid id)
     {
-        var user = await _dbContext.Users.FindAsync(id);
-        if (user is null)
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            throw new KeyNotFoundException($"There is no user with ID {id} in the database.");
+            var user = await _dbContext.Users.FindAsync(id);
+            if (user is null)
+            {
+                throw new KeyNotFoundException($"There is no user with ID {id} in the database.");
+            }
+
+            // First revoke all refresh tokens
+            await _tokenService.RevokeAllRefreshTokenAsync(id, "User account permanently deleted");
+
+            // Then delete the user
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+
+            // Publish event
+            await _publishEndpoint.Publish(new UserDeletedEvent(
+                user.UserId,
+                user.Username,
+                user.Email,
+                user.ContactNo,
+                DateTime.UtcNow
+            ));
+
+            await transaction.CommitAsync();
+            _logger.LogInformation("Successfully deleted user: {UserId}", user.UserId);
         }
-
-        _dbContext.Users.Remove(user);
-        await _dbContext.SaveChangesAsync();
-
-        // Publish event
-        await _publishEndpoint.Publish(new UserDeletedEvent(
-            user.UserId,
-            user.Username,
-            user.Email,
-            user.ContactNo,
-            DateTime.UtcNow
-        ));
-
-        _logger.LogInformation("Successfully deleted user: {UserId}", user.UserId);
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Failed to delete user: {UserId}", id);
+            throw;
+        }
     }
 
     public async Task<GetUserDto> EditUserInfoAsync(Guid id, EditUserDto dto)
@@ -178,17 +204,22 @@ public class UserService : IUserService
         return UserProjections.ToGetUserDto.Compile()(user);
     }
 
-    public async Task<List<GetUserDto>> GetAllAsync()
+    public async Task<List<GetUserDto>> GetAllAsync(int pageNumber, int pageSize)
     {
+        if (pageNumber < 1)
+        {
+            throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
+        }
+        if (pageSize < 1 || pageSize > 100)
+        {
+            throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        }
         var allUsers = await _dbContext.Users
             .Where(u => !u.IsDeleted) // only non-deleted users
             .Select(UserProjections.ToGetUserDto)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
-
-        if (allUsers.Count == 0)
-        {
-            throw new KeyNotFoundException("There are no users in the database.");
-        }
 
         return allUsers;
     }
@@ -212,34 +243,47 @@ public class UserService : IUserService
     {
         _logger.LogInformation("Attempting to soft delete user: {UserId}", id);
 
-        var user = await _dbContext.Users.FindAsync(id);
-        if (user == null)
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            _logger.LogWarning("User with ID {UserId} not found for soft deletion", id);
-            throw new KeyNotFoundException($"There is no user with ID {id} in the database");
-        }
+            var user = await _dbContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found for soft deletion", id);
+                throw new KeyNotFoundException($"There is no user with ID {id} in the database");
+            }
 
-        if (user.IsDeleted)
+            if (user.IsDeleted)
+            {
+                _logger.LogWarning("User with ID {UserId} is already soft deleted", id);
+                throw new InvalidOperationException("User is already deleted");
+            }
+
+            // First revoke all refresh tokens
+            await _tokenService.RevokeAllRefreshTokenAsync(id, "User account deleted");
+
+            // Then update user status
+            user.IsDeleted = true;
+            user.DeletedAt = DateTime.UtcNow;
+            user.PermanentDeletionAt = DateTime.UtcNow.AddDays(7); // 7-day grace period
+            user.DeletionReason = reason ?? "User requested deletion";
+            user.AccountStatus = AccountStatus.PendingDeletion;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            _logger.LogInformation("Successfully soft deleted user: {UserId}. Permanent deletion scheduled for: {DeletionData}",
+                user.UserId, user.PermanentDeletionAt);
+
+            return UserProjections.ToGetUserDto.Compile()(user);
+        }
+        catch (Exception ex)
         {
-            _logger.LogWarning("User with ID {UserId} is already soft deleted", id);
-            throw new InvalidOperationException("User is already deleted");
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Failed to soft delete user: {UserId}", id);
+            throw;
         }
-
-        user.IsDeleted = true;
-        user.DeletedAt = DateTime.UtcNow;
-        user.PermanentDeletionAt = DateTime.UtcNow.AddDays(7); // 7-day grace period
-        user.DeletionReason = reason ?? "User requested deletion";
-        user.AccountStatus = AccountStatus.PendingDeletion;
-        user.UpdatedAt = DateTime.UtcNow;
-
-        await _tokenService.RevokeAllRefreshTokenAsync(id, "User account deleted");
-
-        await _dbContext.SaveChangesAsync();
-
-        _logger.LogInformation("Successfully soft deleted user: {UserId}. Permanent deletion scheduled for: {DeletionData}",
-            user.UserId, user.PermanentDeletionAt);
-
-        return UserProjections.ToGetUserDto.Compile()(user);
     }
 
     public async Task<GetUserDto> RestoreUserAsync(Guid id)

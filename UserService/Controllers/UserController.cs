@@ -30,19 +30,19 @@ namespace UserService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
         {
             _logger.LogInformation("GetAll endpoint called");
 
             try
             {
-                var allUsers = await _userService.GetAllAsync();
+                var allUsers = await _userService.GetAllAsync(pageNumber, pageSize);
                 return Ok(allUsers);
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogWarning("No users found: {ErrorMessage}", ex.Message);
-                return NotFound(new { errorMessage = ex.Message });
+                _logger.LogWarning("Invalid pagination parameters: {ErrorMessage}", ex.Message);
+                return BadRequest(new { errorMessage = ex.Message });
             }
         }
 
@@ -63,7 +63,7 @@ namespace UserService.Controllers
                 var user = await _userService.GetUserByIdAsync(id);
                 return Ok(user);
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
                 _logger.LogWarning("User not found: {ErrorMessage}", ex.Message);
                 return NotFound(new { errorMessage = ex.Message });

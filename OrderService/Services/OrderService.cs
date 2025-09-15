@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.DTO;
 using OrderService.Models;
+using OrderService.Services.Helper;
 using OrderService.Services.Interfaces;
 
 namespace OrderService.Services;
@@ -25,37 +26,83 @@ public class OrderService : IOrderService
         _logger = logger;
     }
 
-    public async Task<List<GetOrderDto>> GetAllAsync()
+    public async Task<List<GetOrderDto>> GetAllAsync(int pageNumber, int pageSize)
     {
+        if (pageNumber < 1)
+        {
+            throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
+        }
+        if (pageSize < 1 || pageSize > 100)
+        {
+            throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        }
+
         var allOrders = await _dbContext.Orders
             .Include(o => o.OrderItems)
             .ThenInclude(o => o.Product)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        if (allOrders.Count == 0)
-        {
-            throw new KeyNotFoundException("There are no orders in the database.");
-        }
-
-        return allOrders.Select(MapToGetOrderDto).ToList();
+        return allOrders.Select(MapToGetOrderDto.GetOrderDtoOutput).ToList();
     }
 
-    public async Task<GetOrderDto> GetOrderByIdAsync(Guid id)
+    public async Task<GetOrderDto> GetOrderByIdAsync(Guid id, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders
-            .Include(o => o.OrderItems)
-            .ThenInclude(o => o.Product)
-            .FirstOrDefaultAsync(o => o.OrderId == id); //# and (o => userId == o.CustomerId) later on when log in is added
+        Order? order;
+
+        if (userRole == "Admin")
+        {
+            // Admin can access any order
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+        else
+        {
+            // User can only access their own orders
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == userId);
+        }
 
         if (order is null)
         {
-            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+            var message = userRole == "Admin"
+                ? $"There is no order with ID {id} in the database."
+                : $"There is no order with ID {id} for this user in the database.";
+            throw new KeyNotFoundException(message);
         }
 
-        return MapToGetOrderDto(order);
+        return MapToGetOrderDto.GetOrderDtoOutput(order);
     }
 
-    public async Task<GetOrderDto> CreateOrderAsync(CreateOrderDto dto)
+    // Get ALL orders for a specific user
+    public async Task<List<GetOrderDto>> GetOrdersByUserIdAsync(Guid userId, int pageNumber, int pageSize)
+    {
+        if (pageNumber < 1)
+        {
+            throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
+        }
+        if (pageSize < 1 || pageSize > 100)
+        {
+            throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        }
+        var orders = await _dbContext.Orders
+            .Include(o => o.OrderItems)
+            .ThenInclude(o => o.Product)
+            .Where(p => p.CustomerId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return orders.Select(MapToGetOrderDto.GetOrderDtoOutput).ToList();
+    }
+
+    public async Task<GetOrderDto> CreateOrderAsync(CreateOrderDto dto, Guid userId, string userRole)
     {
         if (dto.OrderItems == null || dto.OrderItems.Count == 0)
         {
@@ -103,7 +150,7 @@ public class OrderService : IOrderService
         var order = new Order
         {
             OrderId = Guid.NewGuid(),
-            CustomerId = Guid.NewGuid(), // will change this to UserId later when I add log in function
+            CustomerId = userId,
             Status = OrderStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             OrderItems = dto.OrderItems.Select(item =>
@@ -154,21 +201,38 @@ public class OrderService : IOrderService
         ));
 
         _logger.LogInformation("Successfully created order {OrderId}.", order.OrderId);
-        return MapToGetOrderDto(createdOrder);
+        return MapToGetOrderDto.GetOrderDtoOutput(createdOrder);
 
     }
 
-    public async Task<GetOrderDto> ConfirmOrderAsync(Guid id)
+    public async Task<GetOrderDto> ConfirmOrderAsync(Guid id, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders
-                 .Include(o => o.OrderItems)
-                 .ThenInclude(o => o.Product)
-                 .FirstOrDefaultAsync(o => o.OrderId == id);
+        Order? order;
+
+        if (userRole == "Admin")
+        {
+            // Admin can confirm any order
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+        else
+        {
+            // User can only confirm their own orders
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == userId);
+        }
 
         if (order is null)
         {
-            _logger.LogWarning("No order {OrderId} found in the database.", id);
-            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+            _logger.LogWarning("No order {OrderId} found for confirmation by {UserRole} user {UserId}.", id, userRole, userId);
+            var message = userRole == "Admin"
+                ? $"There is no order with ID {id} in the database."
+                : $"There is no order with ID {id} for this user in the database.";
+            throw new KeyNotFoundException(message);
         }
 
         if (order.Status != OrderStatus.Pending)
@@ -188,20 +252,37 @@ public class OrderService : IOrderService
             DateTime.UtcNow
         ));
         _logger.LogInformation("Successfully confirmed order {OrderId}.", order.OrderId);
-        return MapToGetOrderDto(order);
+        return MapToGetOrderDto.GetOrderDtoOutput(order);
     }
 
-    public async Task<GetOrderDto> EditOrderAsync(Guid id, EditOrderDto dto)
+    public async Task<GetOrderDto> EditOrderAsync(Guid id, EditOrderDto dto, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders
+        Order? order;
+
+        if (userRole == "Admin")
+        {
+            // Admin can edit any order
+            order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+        else
+        {
+            // User can only edit their own orders
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == userId);
+        }
 
         if (order is null)
         {
-            _logger.LogWarning("No order {OrderId} found in the database.", id);
-            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+            _logger.LogWarning("No order {OrderId} found for editing by {UserRole} user {UserId}.", id, userRole, userId);
+            var message = userRole == "Admin"
+                ? $"There is no order with ID {id} in the database."
+                : $"There is no order with ID {id} for this user in the database.";
+            throw new KeyNotFoundException(message);
         }
 
         if (order.Status != OrderStatus.Pending)
@@ -296,7 +377,7 @@ public class OrderService : IOrderService
         if (!hasChanges)
         {
             _logger.LogInformation("No changes detected for order {OrderId}.", id);
-            return MapToGetOrderDto(order);
+            return MapToGetOrderDto.GetOrderDtoOutput(order);
         }
 
         _logger.LogInformation("Performing smart merge for order {OrderId}.", id);
@@ -325,20 +406,37 @@ public class OrderService : IOrderService
         ));
 
         _logger.LogInformation("Successfully updated order {OrderId}.", id);
-        return MapToGetOrderDto(updatedOrder);
+        return MapToGetOrderDto.GetOrderDtoOutput(updatedOrder);
     }
 
-    public async Task<GetOrderDto> AddOrderItemsAsync(Guid id, List<CreateOrderItemDto> newItems)
+    public async Task<GetOrderDto> AddOrderItemsAsync(Guid id, List<CreateOrderItemDto> newItems, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders
+        Order? order;
+
+        if (userRole == "Admin")
+        {
+            // Admin can add items to any order
+            order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+        else
+        {
+            // User can only add items to their own orders
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == userId);
+        }
 
         if (order is null)
         {
-            _logger.LogWarning("No order {OrderId} found in the database.", id);
-            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+            _logger.LogWarning("No order {OrderId} found for adding items by {UserRole} user {UserId}.", id, userRole, userId);
+            var message = userRole == "Admin"
+                ? $"There is no order with ID {id} in the database."
+                : $"There is no order with ID {id} for this user in the database.";
+            throw new KeyNotFoundException(message);
         }
 
         if (order.Status != OrderStatus.Pending)
@@ -440,20 +538,37 @@ public class OrderService : IOrderService
             )).ToList()
         ));
         _logger.LogInformation("Successfully updated order {OrderId}.", id);
-        return MapToGetOrderDto(updatedOrder);
+        return MapToGetOrderDto.GetOrderDtoOutput(updatedOrder);
     }
 
-    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove)
+    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders
+        Order? order;
+
+        if (userRole == "Admin")
+        {
+            // Admin can remove items from any order
+            order = await _dbContext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(o => o.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == id);
+        }
+        else
+        {
+            // User can only remove items from their own orders
+            order = await _dbContext.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(o => o.Product)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == userId);
+        }
 
         if (order is null)
         {
-            _logger.LogWarning("No order {OrderId} found in the database.", id);
-            throw new KeyNotFoundException($"There is no order with ID {id} in the database.");
+            _logger.LogWarning("No order {OrderId} found for removing items by {UserRole} user {UserId}.", id, userRole, userId);
+            var message = userRole == "Admin"
+                ? $"There is no order with ID {id} in the database."
+                : $"There is no order with ID {id} for this user in the database.";
+            throw new KeyNotFoundException(message);
         }
 
         if (order.Status != OrderStatus.Pending)
@@ -548,7 +663,7 @@ public class OrderService : IOrderService
             ));
 
             _logger.LogInformation("Successfully deleted order {OrderId} (all items removed).", id);
-            return MapToGetOrderDto(order);
+            return MapToGetOrderDto.GetOrderDtoOutput(order);
         }
 
         // Save partial changes
@@ -576,12 +691,21 @@ public class OrderService : IOrderService
         ));
 
         _logger.LogInformation("Successfully updated order {OrderId}.", id);
-        return MapToGetOrderDto(updatedOrder);
+        return MapToGetOrderDto.GetOrderDtoOutput(updatedOrder);
     }
 
-    public async Task DeleteOrderAsync(Guid id)
+    public async Task DeleteOrderAsync(Guid id, Guid userId, string userRole)
     {
-        var order = await _dbContext.Orders.FindAsync(id);
+        Order? order;
+        if (userRole == "Admin")
+        {
+            order = await _dbContext.Orders.FindAsync(id);
+        }
+        else
+        {
+            order = await _dbContext.Orders.FirstOrDefaultAsync(u => u.CustomerId == userId && u.OrderId == id);
+        }
+
 
         if (order is null)
         {
@@ -608,31 +732,5 @@ public class OrderService : IOrderService
         ));
 
         _logger.LogInformation("Successfully deleted order {OrderId}.", id);
-    }
-
-    private static GetOrderDto MapToGetOrderDto(Order order)
-    {
-        var orderItems = order.OrderItems.Select(oi => new GetOrderItemDto(
-            oi.OrderItemId,
-            oi.Quantity,
-            oi.UnitPrice,
-            new ProductDto(
-                oi.Product.ProductId,
-                oi.Product.ProductName,
-                oi.Product.Price,
-                oi.Product.Stock
-            ),
-            oi.UnitPrice * oi.Quantity // TotalPrice
-        )).ToList();
-
-        return new GetOrderDto(
-            order.OrderId,
-            order.CustomerId,
-            order.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity), // TotalPrice
-            order.CreatedAt,
-            order.UpdatedAt,
-            order.Status,
-            orderItems
-        );
     }
 }

@@ -5,7 +5,7 @@ namespace OrderService.Services.Interfaces;
 
 public interface IProductService
 {
-    Task<List<ProductDto>> GetAllAsync();
+    Task<List<ProductDto>> GetAllAsync(int pageNumber, int pageSize);
     Task<ProductDto> GetProductByIdAsync(Guid productId);
     Task<ProductDto> CreateProductAsync(CreateProductDto dto);
     Task<ProductDto> EditProductAsync(Guid id, EditProductDto dto);

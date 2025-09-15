@@ -49,7 +49,7 @@ public class ProductService : IProductService
         {
             throw new InvalidOperationException("Product already exists.");
         }
-        
+
         var product = new Product
         {
             ProductId = Guid.NewGuid(),
@@ -165,23 +165,32 @@ public class ProductService : IProductService
                 product.Stock,
                 product.UpdatedAt
             ));
-            
+
             _logger.LogInformation("Successfully updated product {ProductId}", product.ProductId);
         }
 
         return ProductProjection.Compile()(product);
     }
 
-    public async Task<List<ProductDto>> GetAllAsync()
+    public async Task<List<ProductDto>> GetAllAsync(int pageNumber, int pageSize)
     {
-        var allProducts = await _dbContext.Products
-            .Select(ProductProjection)
-            .ToListAsync();
-        if (allProducts.Count == 0)
+        if (pageNumber < 1)
         {
-            throw new KeyNotFoundException("There are no products in the database.");
+            throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
         }
-        return allProducts;
+
+        if (pageSize < 1 || pageSize > 100) 
+        {
+            throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        }
+
+        var products = await _dbContext.Products
+            .Select(ProductProjection)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return products;
     }
 
     public async Task<ProductDto> GetProductByIdAsync(Guid productId)

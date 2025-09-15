@@ -6,7 +6,7 @@ namespace UserService.Services.Interfaces;
 
 public interface IUserService
 {
-    Task<List<GetUserDto>> GetAllAsync();
+    Task<List<GetUserDto>> GetAllAsync(int pageNumber, int pageSize);
     Task<GetUserDto> GetUserByIdAsync(Guid id);
     Task<GetUserDto> CreateUserAsync(CreateUserDto dto);
     Task<GetUserDto> EditUserInfoAsync(Guid id, EditUserDto dto);

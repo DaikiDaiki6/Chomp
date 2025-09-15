@@ -1,17 +1,20 @@
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.DTO;
 using OrderService.Models;
+using OrderService.Services.Helper;
 using OrderService.Services.Interfaces;
 
 namespace OrderService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
@@ -25,30 +28,34 @@ namespace OrderService.Controllers
             _productService = productService;
         }
 
-        // Whole Product Controller is for Admin only
-
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
         {
-            // check if logged in
-            _logger.LogInformation("Getting all products - Admin Request");
+            var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+            var (userId, userRole, _) = isAuthenticated ? GetCurrentUserInfo.GetUserInfo(User!) : (null, "Anonymous", false);
+
+            _logger.LogInformation("GetAll Endpoint - {Role} Request {UserId}", userRole ?? "Anonymous", userId ?? "N/A");
             try
             {
-                var allProducts = await _productService.GetAllAsync();
+                var allProducts = await _productService.GetAllAsync(pageNumber, pageSize);
                 return Ok(allProducts);
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
-                return NotFound(new { errorMessage = ex.Message });
+                return BadRequest(new { errorMessage = ex.Message });
             }
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
         [HttpGet("{productId:guid}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetProductById(Guid productId)
         {
-            // check if logged in
-            _logger.LogInformation("Getting product - Admin Request for product {ProductId}", productId);
+            var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+            var (userId, userRole, _) = isAuthenticated ? GetCurrentUserInfo.GetUserInfo(User!) : (null, "Anonymous", false);
+
+            _logger.LogInformation("GetProductById Endpoint - Product {ProductId} : {Role} Request {UserId}", 
+                productId, userRole ?? "Anonymous", userId ?? "N/A");
             try
             {
                 var product = await _productService.GetProductByIdAsync(productId);
@@ -61,11 +68,12 @@ namespace OrderService.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
-            // check if logged in
-            _logger.LogInformation("CreateProduct endpoint called for product: {ProductName}", dto.ProductName);
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
 
+            _logger.LogInformation("CreateProduct Endpoint - {Role} Request {UserId}", userRole, userId);
             try
             {
                 var product = await _productService.CreateProductAsync(dto);
@@ -78,15 +86,15 @@ namespace OrderService.Controllers
                 _logger.LogWarning("Product creation failed: {ErrorMessage}", ex.Message);
                 return BadRequest(new { errorMessage = ex.Message });
             }
-
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
         [HttpPatch("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditProduct(Guid id, EditProductDto dto)
         {
-            _logger.LogInformation("EditProduct endpoint called for product: {ProductId}", id);
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
 
+            _logger.LogInformation("EditProduct Endpoint - Product {ProductId} {Role} Request {UserId}", id, userRole, userId);
             try
             {
                 var updatedProduct = await _productService.EditProductAsync(id, dto);
@@ -104,15 +112,15 @@ namespace OrderService.Controllers
                 _logger.LogWarning("Product update failed: {ErrorMessage}", ex.Message);
                 return BadRequest(new { errorMessage = ex.Message });
             }
-
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
-            _logger.LogInformation("DeleteProduct endpoint called for product: {ProductId}", id);
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
 
+            _logger.LogInformation("DeleteProduct Endpoint - Product {ProductId} {Role} Request {UserId}", id, userRole, userId);
             try
             {
                 await _productService.DeleteProductAsync(id);
@@ -130,8 +138,6 @@ namespace OrderService.Controllers
                 _logger.LogWarning("Product deletion failed: {ErrorMessage}", ex.Message);
                 return BadRequest(new { errorMessage = ex.Message });
             }
-
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
     }
 }

@@ -80,7 +80,7 @@ namespace UserService.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst("userId")?.Value;
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var username = User.FindFirst("username")?.Value ?? User.Identity?.Name;
 
                 if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))

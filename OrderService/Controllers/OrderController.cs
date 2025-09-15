@@ -1,17 +1,22 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OrderService.Attributes;
 using OrderService.DTO;
-using OrderService.Models;
+using OrderService.Services.Helper;
 using OrderService.Services.Interfaces;
 
 namespace OrderService.Controllers
-{
+{ // fix userGuid for editing only your orders and not others
     [Route("api/[controller]")]
     [ApiController]
+    [AccountStatusFilter]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> _logger;
         private readonly IOrderService _orderService;
-        
+
         public OrderController(
             ILogger<OrderController> logger,
             IOrderService orderService)
@@ -20,52 +25,83 @@ namespace OrderService.Controllers
             _orderService = orderService;
         }
 
-        [HttpGet] // for Admin only
-        public async Task<IActionResult> GetAll()
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAll(int pageNumber, int pageSize)
         {
-            // check if loggedin 
-            // if(User.Role == Admin) do this 
-            // get logged in user ID then do this 
-            _logger.LogInformation("Getting all orders - Admin Request");
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            _logger.LogInformation("GetAll Endpoint - {Role} Request {UserID}", userRole, userId);
             try
             {
-                var allOrders = await _orderService.GetAllAsync();
+                var allOrders = await _orderService.GetAllAsync(pageNumber, pageSize);
                 return Ok(allOrders);
             }
-            catch (KeyNotFoundException ex)
+            catch (ArgumentException ex)
             {
-                return NotFound(new { errorMessage = ex.Message });
+                return BadRequest(new { errorMessage = ex.Message });
             }
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
-        [HttpGet("{id:guid}")] // mainly for Admin -- can be abused (User can use it too)
-        public async Task<IActionResult> GetOrderById(Guid id)
+        [HttpGet("my-orders")]
+        public async Task<IActionResult> GetMyOrders(int pageNumber, int pageSize)
         {
-            // check if logged in 
-            // if user _logger.LogInformation("Getting user - User {id} Request", id);
-            // if admin _logger.LogInformation("Getting user - Admin Request");
-            _logger.LogInformation("Getting order - Admin Request for order {OrderId}", id); //temporary
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("GetMyOrders Endpoint - {Role} Request {UserID}", userRole, userId);
             try
             {
-                var order = await _orderService.GetOrderByIdAsync(id);
+                var userOrders = await _orderService.GetOrdersByUserIdAsync(userGuid, pageNumber, pageSize);
+                return Ok(userOrders);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { errorMessage = ex.Message });
+            }
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetOrderById(Guid id)
+        {
+            var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("GetOrderById Endpoint - {Role} Request {UserID} for Order {OrderID}",
+                userRole, userId, id);
+            try
+            {
+                var order = await _orderService.GetOrderByIdAsync(id, userGuid, userRole ?? "User");
                 return Ok(order);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { errorMessage = ex.Message });
             }
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
-            // check if logged in
-            _logger.LogInformation("Creating an order for customer {CustomerId}.", Guid.NewGuid()); // for now, get UserId for this later
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("CreatingOrder Endpoint - User ID: {CustomerId}.", userId);
             try
             {
-                var createOrder = await _orderService.CreateOrderAsync(dto);
+                var createOrder = await _orderService.CreateOrderAsync(dto, userGuid, userRole ?? "User");
 
                 _logger.LogInformation("Successfully created order {OrderId}.", createOrder.OrderId);
                 return CreatedAtAction(nameof(GetOrderById),
@@ -80,19 +116,23 @@ namespace OrderService.Controllers
             {
                 return BadRequest(new { errorMessage = ex.Message });
             }
-
-
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
         [HttpPatch("{id:guid}/confirm-order")]
         public async Task<IActionResult> ConfirmOrder(Guid id)
         {
-            // check if logged in
-            _logger.LogInformation("Confirming order {OrderId}.", id);
+            var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("ConfirmOrder Endpoint - Order {OrderId} by User {UserId}", id, userId);
+
             try
             {
-                var order = await _orderService.ConfirmOrderAsync(id);
+                var order = await _orderService.ConfirmOrderAsync(id, userGuid, userRole ?? "User");
 
                 _logger.LogInformation("Successfully confirmed order {OrderId}.", order.OrderId);
                 return Ok(new
@@ -111,18 +151,20 @@ namespace OrderService.Controllers
             }
         }
 
-        /// <summary>
-        /// Replace the entire order items with the provided list (smart merge).
-        /// Items not in the request will be removed. Use this when you want the order to match exactly what you send.
-        /// </summary>
         [HttpPatch("{id:guid}")]
         public async Task<IActionResult> EditOrder(Guid id, EditOrderDto dto)
         {
-            // check if logged in
-            _logger.LogInformation("Updating order {OrderId}.", id);
+            var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+             _logger.LogInformation("EditOrder Endpoint - Order {OrderId} by User {UserId}", id, userId);
             try
             {
-                var updatedOrder = await _orderService.EditOrderAsync(id, dto);
+                var updatedOrder = await _orderService.EditOrderAsync(id, dto, userGuid, userRole ?? "User");
                 return Ok(updatedOrder);
             }
             catch (KeyNotFoundException ex)
@@ -133,20 +175,22 @@ namespace OrderService.Controllers
             {
                 return BadRequest(new { errorMessage = ex.Message });
             }
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
 
-        /// <summary>
-        /// Add new items to an existing order. If an item already exists, increases the quantity.
-        /// </summary>
         [HttpPost("{id:guid}/items")]
         public async Task<IActionResult> AddOrderItems(Guid id, List<CreateOrderItemDto> newItems)
         {
-            // check if logged in
-            _logger.LogInformation("Adding items to order {OrderId}.", id);
+            var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("AddOrderItems Endpoint - Order {OrderId} by User {UserId}", id, userId);
             try
             {
-                var addedItems = await _orderService.AddOrderItemsAsync(id, newItems);
+                var addedItems = await _orderService.AddOrderItemsAsync(id, newItems, userGuid, userRole ?? "User");
                 return Ok(addedItems);
             }
             catch (KeyNotFoundException ex)
@@ -159,17 +203,20 @@ namespace OrderService.Controllers
             }
         }
 
-        /// <summary>
-        /// Remove specific items from an order by product IDs.
-        /// </summary>
         [HttpDelete("{id:guid}/items")]
         public async Task<IActionResult> RemoveOrderItems(Guid id, List<RemoveOrderItemDto> itemsToRemove)
         {
-            // check if logged in
-            _logger.LogInformation("Removing items from order {OrderId}.", id);
+            var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+             _logger.LogInformation("RemoveOrderItems Endpoint - Order {OrderId} by User {UserId}", id, userId);
             try
             {
-                var orders = await _orderService.RemoveOrderItemsAsync(id, itemsToRemove);
+                var orders = await _orderService.RemoveOrderItemsAsync(id, itemsToRemove, userGuid, userRole ?? "User");
                 return Ok(orders);
             }
             catch (KeyNotFoundException ex)
@@ -185,19 +232,23 @@ namespace OrderService.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            // check if logged in
-            _logger.LogInformation("DeleteOrder endpoint called for user: {UserId}", id);
+            var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            {
+                return Unauthorized("Invalid user token");
+            }
+
+            _logger.LogInformation("DeleteOrder Endpoint - Order ID: {OrderId} from User ID:{UserId}.", id, userId);
             try
             {
-                await _orderService.DeleteOrderAsync(id);
+                await _orderService.DeleteOrderAsync(id, userGuid, userRole ?? "User");
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { errorMessage = ex.Message });
             }
-
-            // else Return Unathorized({message: "You are not authorized for this action."})
         }
     }
 }
