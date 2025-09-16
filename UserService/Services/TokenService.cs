@@ -173,7 +173,7 @@ public class TokenService : ITokenService
     public async Task RevokeAllRefreshTokenAsync(Guid userId, string reason)
     {
         var activeTokens = await _dbContext.RefreshTokens
-            .Where(rt => rt.UserId == userId && rt.IsActive)
+            .Where(rt => rt.UserId == userId && rt.RevokedAt == null && DateTime.UtcNow < rt.ExpiresAt)
             .ToListAsync();
 
         foreach (var token in activeTokens)
@@ -205,6 +205,7 @@ public class TokenService : ITokenService
     public async Task<GetUserDto> ValidateRefreshTokenAsync(string refreshToken)
     {
         var tokenRecord = await _dbContext.RefreshTokens
+            .Include(rt => rt.User)
             .FirstOrDefaultAsync(u => u.RefreshTokenValue == refreshToken);
 
         if (tokenRecord == null)

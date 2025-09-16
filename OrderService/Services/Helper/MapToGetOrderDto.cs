@@ -24,6 +24,7 @@ public class MapToGetOrderDto
         return new GetOrderDto(
             order.OrderId,
             order.CustomerId,
+            order.PaymentType,
             order.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity), // TotalPrice
             order.CreatedAt,
             order.UpdatedAt,

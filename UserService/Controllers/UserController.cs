@@ -51,7 +51,11 @@ namespace UserService.Controllers
         public async Task<IActionResult> GetUserById(Guid id)
         {
             _logger.LogInformation("GetUserById endpoint called for user: {UserId}", id);
-
+            // Console.WriteLine(id);
+            // foreach (var claim in User.Claims)
+            // {
+            //     Console.WriteLine($"{claim.Type}: {claim.Value}");
+            // }
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);
@@ -96,10 +100,7 @@ namespace UserService.Controllers
         public async Task<IActionResult> EditUserInfo(Guid id, EditUserDto dto)
         {
             _logger.LogInformation("EditUserInfo endpoint called for user: {UserId}", id);
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"{claim.Type}: {claim.Value}");
-            }
+            
             if (!CanModifyUserHelper.CanModifyUser(User, id))
             {
                 _logger.LogWarning("User attempted to access unauthorized profile: {UserId}", id);

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using Contracts;
 using MassTransit;
@@ -147,10 +148,16 @@ public class OrderService : IOrderService
             throw new InvalidOperationException($"Insufficient stock for the following products: {string.Join(",", stockErrors)}");
         }
 
+        if (!Enum.IsDefined(typeof(PaymentType), dto.PaymentType))
+        {
+            throw new InvalidOperationException($"Unknown Payment Type: {nameof(dto.PaymentType)}");
+        }
+
         var order = new Order
         {
             OrderId = Guid.NewGuid(),
             CustomerId = userId,
+            PaymentType = dto.PaymentType,
             Status = OrderStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             OrderItems = dto.OrderItems.Select(item =>
@@ -248,6 +255,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderConfirmedEvent(
             order.OrderId,
             order.CustomerId,
+            order.PaymentType,
             order.TotalPrice,
             DateTime.UtcNow
         ));
@@ -292,6 +300,14 @@ public class OrderService : IOrderService
         }
 
         bool hasChanges = false;
+        if (dto.PaymentType != null)
+        {
+            if (!Enum.IsDefined(typeof(PaymentType), dto.PaymentType)){
+                throw new InvalidOperationException($"Unknown Payment Type: {nameof(dto.PaymentType)}");
+            }
+            order.PaymentType = (Contracts.PaymentType)dto.PaymentType;
+            hasChanges = true;
+        }
 
         if (dto.OrderItems != null && dto.OrderItems.Count > 0)
         {
@@ -394,6 +410,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderUpdatedEvent(
             updatedOrder.OrderId,
             updatedOrder.CustomerId,
+            updatedOrder.PaymentType,
             updatedOrder.TotalPrice,
             updatedOrder.CreatedAt,
             updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
@@ -527,6 +544,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderUpdatedEvent(
             updatedOrder.OrderId,
             updatedOrder.CustomerId,
+            updatedOrder.PaymentType,
             updatedOrder.TotalPrice,
             updatedOrder.CreatedAt,
             updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(
@@ -679,6 +697,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderUpdatedEvent(
             updatedOrder.OrderId,
             updatedOrder.CustomerId,
+            updatedOrder.PaymentType,
             updatedOrder.TotalPrice,
             updatedOrder.CreatedAt,
             updatedOrder.OrderItems.Select(o => new Contracts.OrderItem(

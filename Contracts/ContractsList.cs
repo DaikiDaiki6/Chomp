@@ -1,5 +1,13 @@
 ﻿namespace Contracts;
 
+public enum PaymentType
+{
+    ChompWallet,
+    COD,
+    EWallet,
+    Bank
+}
+
 public record UserCreatedEvent(
     Guid UserId,
     string Username,
@@ -34,6 +42,7 @@ public record OrderPlacedEvent(
 public record OrderUpdatedEvent(
     Guid OrderId,
     Guid CustomerId,
+    PaymentType PaymentType,
     decimal TotalPrice,
     DateTime UpdatedAt,
     List<OrderItem> Items);
@@ -47,6 +56,7 @@ public record OrderCancelledEvent(
 public record OrderConfirmedEvent(
     Guid OrderId,
     Guid CustomerId,
+    PaymentType PaymentType,
     decimal TotalPrice,
     DateTime CompletedAt);
 

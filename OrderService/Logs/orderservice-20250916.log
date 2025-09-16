@@ -1,0 +1,349 @@
+[2025-09-16 10:51:56.259 +08:00 INF Starting up OrderService {}
+][2025-09-16 10:51:56.412 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_6oqyyybzsrcod3xqbdq9j199gx, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:51:56.421 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_6oqyyybzsrcod3xqbdq9j199gx, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:51:56.424 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_6oqyyybzsrcod3xqbdq9j199gx, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:51:56.568 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:51:56.574 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:51:56.576 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:51:56.578 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:51:56.724 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 10:52:02.654 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKPG1NOSQ6:00000001","RequestPath":"/","ConnectionId":"0HNFKPG1NOSQ6"}
+][2025-09-16 10:53:46.713 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"534da20e-4ea4-4e1e-8488-4f1fc3d2abd7","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKPG1NOSQA:00000001","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKPG1NOSQA"}
+][2025-09-16 10:53:56.826 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"534da20e-4ea4-4e1e-8488-4f1fc3d2abd7","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKPG1NOSQA:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKPG1NOSQA"}
+][2025-09-16 10:53:57.804 +08:00 ERR Failed executing DbCommand (45ms) [Parameters=[@__userId_0='?' (DbType = Guid), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT o1."OrderId", o1."CreatedAt", o1."CustomerId", o1."PaymentType", o1."Status", o1."UpdatedAt", s."OrderItemId", s."OrderId", s."ProductId", s."Quantity", s."UnitPrice", s."ProductId0", s."AddedBy", s."CreatedAt", s."Price", s."ProductName", s."Stock", s."UpdatedAt"
+FROM (
+    SELECT o."OrderId", o."CreatedAt", o."CustomerId", o."PaymentType", o."Status", o."UpdatedAt"
+    FROM "Orders" AS o
+    WHERE o."CustomerId" = @__userId_0
+    ORDER BY o."CreatedAt" DESC
+    LIMIT @__p_2 OFFSET @__p_1
+) AS o1
+LEFT JOIN (
+    SELECT o0."OrderItemId", o0."OrderId", o0."ProductId", o0."Quantity", o0."UnitPrice", p."ProductId" AS "ProductId0", p."AddedBy", p."CreatedAt", p."Price", p."ProductName", p."Stock", p."UpdatedAt"
+    FROM "OrderItems" AS o0
+    INNER JOIN "Products" AS p ON o0."ProductId" = p."ProductId"
+) AS s ON o1."OrderId" = s."OrderId"
+ORDER BY o1."CreatedAt" DESC, o1."OrderId", s."OrderItemId" {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"534da20e-4ea4-4e1e-8488-4f1fc3d2abd7","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKPG1NOSQA:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKPG1NOSQA"}
+][2025-09-16 10:53:57.828 +08:00 ERR An exception occurred while iterating over the results of a query for context type 'OrderService.Data.OrdersDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"534da20e-4ea4-4e1e-8488-4f1fc3d2abd7","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKPG1NOSQA:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKPG1NOSQA"}
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-16 10:53:57.842 +08:00 ERR Unhandled exception occurred while processing /api/Order/my-orders {"RequestId":"0HNFKPG1NOSQA:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKPG1NOSQA"}
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at OrderService.Services.OrderService.GetOrdersByUserIdAsync(Guid userId, Int32 pageNumber, Int32 pageSize) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Services\OrderService.cs:line 93
+   at OrderService.Controllers.OrderController.GetMyOrders(Int32 pageNumber, Int32 pageSize) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Controllers\OrderController.cs:line 59
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at OrderService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-16 10:56:56.753 +08:00 INF Usage Telemetry: {"id":"f41c0000-37b1-1901-1947-08ddf4cbffcf","created":"2025-09-16T10:51:56.3780057\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-16T10:51:56.3804212\u002B08:00","configured":"2025-09-16T10:51:56.4996346\u002B08:00","started":"2025-09-16T10:51:56.7230762\u002B08:00","name":"IBus","endpoints":[{"name":"DESKTOPHUMQD41_OrderService_endpoint_6oqyyybzsrcod3xqbdq9j199gx","type":"RabbitMQ","prefetch_count":16,"consumer_count":3,"message_count":3},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:08.611 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:59:08.673 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:19.166 +08:00 INF Starting up OrderService {}
+][2025-09-16 10:59:19.306 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_qozyyybzsrconj7nbdq9jue8gc, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:19.314 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_qozyyybzsrconj7nbdq9jue8gc, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:19.319 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_qozyyybzsrconj7nbdq9jue8gc, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:19.459 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:59:19.463 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:59:19.465 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:59:19.467 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 10:59:19.617 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 10:59:20.593 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKPK48MFBQ:00000001","RequestPath":"/swagger/index.html","ConnectionId":"0HNFKPK48MFBQ"}
+][2025-09-16 11:04:19.648 +08:00 INF Usage Telemetry: {"id":"742e0000-37b1-1901-7ba5-08ddf4cd07cb","created":"2025-09-16T10:59:19.2728154\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-16T10:59:19.2744667\u002B08:00","configured":"2025-09-16T10:59:19.3954051\u002B08:00","started":"2025-09-16T10:59:19.6160583\u002B08:00","name":"IBus","endpoints":[{"name":"DESKTOPHUMQD41_OrderService_endpoint_qozyyybzsrconj7nbdq9jue8gc","type":"RabbitMQ","prefetch_count":16,"consumer_count":3,"message_count":3},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-16 11:24:05.579 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:24:05.641 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:28:06.899 +08:00 INF Starting up OrderService {}
+][2025-09-16 11:28:07.030 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_yotoyybzsrconxnzbdq9jwepr4, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:28:07.038 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_yotoyybzsrconxnzbdq9jwepr4, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:28:07.041 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_yotoyybzsrconxnzbdq9jwepr4, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:28:07.173 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:28:07.176 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:28:07.178 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:28:07.179 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:28:07.305 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:29:12.210 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKQ4831K0F:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ4831K0F"}
+][2025-09-16 11:29:12.330 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"fa777375-1df0-46fc-bf53-3aa71fe058cc","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQ4831K0F:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ4831K0F"}
+][2025-09-16 11:29:13.235 +08:00 ERR Failed executing DbCommand (40ms) [Parameters=[@__userId_0='?' (DbType = Guid), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT o1."OrderId", o1."CreatedAt", o1."CustomerId", o1."PaymentType", o1."Status", o1."UpdatedAt", s."OrderItemId", s."OrderId", s."ProductId", s."Quantity", s."UnitPrice", s."ProductId0", s."AddedBy", s."CreatedAt", s."Price", s."ProductName", s."Stock", s."UpdatedAt"
+FROM (
+    SELECT o."OrderId", o."CreatedAt", o."CustomerId", o."PaymentType", o."Status", o."UpdatedAt"
+    FROM "Orders" AS o
+    WHERE o."CustomerId" = @__userId_0
+    ORDER BY o."CreatedAt" DESC
+    LIMIT @__p_2 OFFSET @__p_1
+) AS o1
+LEFT JOIN (
+    SELECT o0."OrderItemId", o0."OrderId", o0."ProductId", o0."Quantity", o0."UnitPrice", p."ProductId" AS "ProductId0", p."AddedBy", p."CreatedAt", p."Price", p."ProductName", p."Stock", p."UpdatedAt"
+    FROM "OrderItems" AS o0
+    INNER JOIN "Products" AS p ON o0."ProductId" = p."ProductId"
+) AS s ON o1."OrderId" = s."OrderId"
+ORDER BY o1."CreatedAt" DESC, o1."OrderId", s."OrderItemId" {"EventId":{"Id":20102,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandError"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","ActionId":"fa777375-1df0-46fc-bf53-3aa71fe058cc","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQ4831K0F:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ4831K0F"}
+][2025-09-16 11:29:13.258 +08:00 ERR An exception occurred while iterating over the results of a query for context type 'OrderService.Data.OrdersDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn {"EventId":{"Id":10100,"Name":"Microsoft.EntityFrameworkCore.Query.QueryIterationFailed"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"fa777375-1df0-46fc-bf53-3aa71fe058cc","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQ4831K0F:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ4831K0F"}
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-16 11:29:13.274 +08:00 ERR Unhandled exception occurred while processing /api/Order/my-orders {"RequestId":"0HNFKQ4831K0F:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ4831K0F"}
+Npgsql.PostgresException (0x80004005): 42703: column o.PaymentType does not exist
+
+POSITION: 337
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at OrderService.Services.OrderService.GetOrdersByUserIdAsync(Guid userId, Int32 pageNumber, Int32 pageSize) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Services\OrderService.cs:line 94
+   at OrderService.Controllers.OrderController.GetMyOrders(Int32 pageNumber, Int32 pageSize) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Controllers\OrderController.cs:line 59
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at OrderService.Middleware.ExceptionHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\jeffr\Documents\Programming\Chomp\OrderService\Middleware\ExceptionHandlingMiddleware.cs:line 21
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column o.PaymentType does not exist
+    Position: 337
+    File: parse_relation.c
+    Line: 3721
+    Routine: errorMissingColumn
+][2025-09-16 11:29:33.015 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:29:33.075 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:33:22.762 +08:00 INF Starting up OrderService {}
+][2025-09-16 11:33:22.899 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hokoyybzsrcod8xmbdq9jwqjg9, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:33:22.907 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hokoyybzsrcod8xmbdq9jwqjg9, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:33:22.911 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hokoyybzsrcod8xmbdq9jwqjg9, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:33:23.147 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:33:23.150 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:33:23.153 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:33:23.154 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:33:23.290 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:33:28.570 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKQ76JC4MP:00000001","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:33:28.697 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"7537d6b7-7b54-49b7-ae92-8f8738f49b2a","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQ76JC4MP:00000001","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:33:56.432 +08:00 INF GetAll Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"17d46581-855e-48c2-8b01-316de01cfecb","ActionName":"OrderService.Controllers.OrderController.GetAll (OrderService)","RequestId":"0HNFKQ76JC4MP:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:33:56.452 +08:00 WRN The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased. {"EventId":{"Id":10102,"Name":"Microsoft.EntityFrameworkCore.Query.RowLimitingOperationWithoutOrderByWarning"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"17d46581-855e-48c2-8b01-316de01cfecb","ActionName":"OrderService.Controllers.OrderController.GetAll (OrderService)","RequestId":"0HNFKQ76JC4MP:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:33:56.457 +08:00 WRN The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased. {"EventId":{"Id":10102,"Name":"Microsoft.EntityFrameworkCore.Query.RowLimitingOperationWithoutOrderByWarning"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"17d46581-855e-48c2-8b01-316de01cfecb","ActionName":"OrderService.Controllers.OrderController.GetAll (OrderService)","RequestId":"0HNFKQ76JC4MP:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:35:49.934 +08:00 INF CreatingOrder Endpoint - User ID: e056ca84-ecf8-4dbe-9af5-f91efe653ca5. {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"f7db769e-0e25-4f84-916a-4ddee606dde5","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ76JC4MP:00000005","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:35:50.193 +08:00 INF Created order event for order "4ae55437-912e-4f97-8b4d-0a84f5cebff2" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"f7db769e-0e25-4f84-916a-4ddee606dde5","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ76JC4MP:00000005","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:35:50.306 +08:00 INF Successfully created order "4ae55437-912e-4f97-8b4d-0a84f5cebff2". {"SourceContext":"OrderService.Services.OrderService","ActionId":"f7db769e-0e25-4f84-916a-4ddee606dde5","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ76JC4MP:00000005","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:35:50.310 +08:00 INF Successfully created order "4ae55437-912e-4f97-8b4d-0a84f5cebff2". {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"f7db769e-0e25-4f84-916a-4ddee606dde5","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ76JC4MP:00000005","RequestPath":"/api/Order","ConnectionId":"0HNFKQ76JC4MP"}
+][2025-09-16 11:38:08.477 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:38:08.534 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:38:12.981 +08:00 INF Starting up OrderService {}
+][2025-09-16 11:38:13.115 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hocyyybzsrcon6mobdq9jwusg5, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:38:13.122 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hocyyybzsrcon6mobdq9jwusg5, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:38:13.125 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_hocyyybzsrcon6mobdq9jwusg5, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:38:13.261 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:38:13.265 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:38:13.266 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:38:13.267 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:38:13.395 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:38:15.595 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKQ9S4DLT6:00000001","RequestPath":"/api/Order","ConnectionId":"0HNFKQ9S4DLT6"}
+][2025-09-16 11:38:15.796 +08:00 INF CreatingOrder Endpoint - User ID: e056ca84-ecf8-4dbe-9af5-f91efe653ca5. {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"e8a36f3b-e633-4787-8a8b-7f7729b1313c","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ9S4DLT6:00000001","RequestPath":"/api/Order","ConnectionId":"0HNFKQ9S4DLT6"}
+][2025-09-16 11:38:17.020 +08:00 INF Created order event for order "6e487497-4eab-41c9-b9cf-e5abd0c8655a" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"e8a36f3b-e633-4787-8a8b-7f7729b1313c","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ9S4DLT6:00000001","RequestPath":"/api/Order","ConnectionId":"0HNFKQ9S4DLT6"}
+][2025-09-16 11:38:17.137 +08:00 INF Successfully created order "6e487497-4eab-41c9-b9cf-e5abd0c8655a". {"SourceContext":"OrderService.Services.OrderService","ActionId":"e8a36f3b-e633-4787-8a8b-7f7729b1313c","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ9S4DLT6:00000001","RequestPath":"/api/Order","ConnectionId":"0HNFKQ9S4DLT6"}
+][2025-09-16 11:38:17.142 +08:00 INF Successfully created order "6e487497-4eab-41c9-b9cf-e5abd0c8655a". {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"e8a36f3b-e633-4787-8a8b-7f7729b1313c","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQ9S4DLT6:00000001","RequestPath":"/api/Order","ConnectionId":"0HNFKQ9S4DLT6"}
+][2025-09-16 11:43:13.431 +08:00 INF Usage Telemetry: {"id":"e4180000-37b1-1901-ce84-08ddf4d276da","created":"2025-09-16T11:38:13.0839862\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-16T11:38:13.0856069\u002B08:00","configured":"2025-09-16T11:38:13.2021675\u002B08:00","started":"2025-09-16T11:38:13.3943776\u002B08:00","name":"IBus","endpoints":[{"name":"DESKTOPHUMQD41_OrderService_endpoint_hocyyybzsrcon6mobdq9jwusg5","type":"RabbitMQ","prefetch_count":16,"consumer_count":3,"message_count":3},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-16 11:49:38.471 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:49:38.528 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:49:44.811 +08:00 INF Starting up OrderService {}
+][2025-09-16 11:49:44.949 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_wodoyybzsrcon83qbdq9jiyub3, Consumer: OrderService.Consumers.PaymentFailedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:49:44.957 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_wodoyybzsrcon83qbdq9jiyub3, Consumer: OrderService.Consumers.PaymentSucceededConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:49:44.960 +08:00 INF Configured endpoint DESKTOPHUMQD41_OrderService_endpoint_wodoyybzsrcon83qbdq9jiyub3, Consumer: OrderService.Consumers.UserDeletedConsumer {"SourceContext":"MassTransit"}
+][2025-09-16 11:49:45.089 +08:00 INF Now listening on: http://localhost:5221 {"EventId":{"Id":14,"Name":"ListeningOnAddress"},"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:49:45.092 +08:00 INF Application started. Press Ctrl+C to shut down. {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:49:45.094 +08:00 INF Hosting environment: Development {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:49:45.095 +08:00 INF Content root path: C:\Users\jeffr\Documents\Programming\Chomp\OrderService {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 11:49:45.222 +08:00 INF Bus started: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+][2025-09-16 11:50:10.834 +08:00 WRN Failed to determine the https port for redirect. {"EventId":{"Id":3,"Name":"FailedToDeterminePort"},"SourceContext":"Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware","RequestId":"0HNFKQGA7QBJN:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:11.050 +08:00 INF CreatingOrder Endpoint - User ID: e056ca84-ecf8-4dbe-9af5-f91efe653ca5. {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:12.243 +08:00 INF Created order event for order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:12.360 +08:00 INF Successfully created order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437". {"SourceContext":"OrderService.Services.OrderService","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:12.365 +08:00 INF Successfully created order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437". {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000002","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:26.801 +08:00 INF CreatingOrder Endpoint - User ID: e056ca84-ecf8-4dbe-9af5-f91efe653ca5. {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000003","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:26.826 +08:00 INF Created order event for order "c752dd53-37fb-4614-a6f2-505a9e1881ee" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000003","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:26.836 +08:00 INF Successfully created order "c752dd53-37fb-4614-a6f2-505a9e1881ee". {"SourceContext":"OrderService.Services.OrderService","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000003","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:50:26.840 +08:00 INF Successfully created order "c752dd53-37fb-4614-a6f2-505a9e1881ee". {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"bbe31bb0-39db-4a12-89dc-a4c4157967ed","ActionName":"OrderService.Controllers.OrderController.CreateOrder (OrderService)","RequestId":"0HNFKQGA7QBJN:00000003","RequestPath":"/api/Order","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:51:25.054 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"6aa06f88-8eaa-4b88-aafc-f9091c08203d","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQGA7QBJN:00000005","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQGA7QBJN"}
+][2025-09-16 11:54:45.250 +08:00 INF Usage Telemetry: {"id":"a4070000-37b1-1901-4ad3-08ddf4d41338","created":"2025-09-16T11:49:44.9179563\u002B08:00","host":{"framework_version":"8.0.17","mass_transit_version":"8.5.2.0","operating_system_version":"Microsoft Windows NT 10.0.26100.0","time_zone_info":"(UTC\u002B08:00) Kuala Lumpur, Singapore","commit_hash":"96adb565f7cc311488d1df104549f924203be760"},"bus":[{"created":"2025-09-16T11:49:44.9197127\u002B08:00","configured":"2025-09-16T11:49:45.0303286\u002B08:00","started":"2025-09-16T11:49:45.2212971\u002B08:00","name":"IBus","endpoints":[{"name":"DESKTOPHUMQD41_OrderService_endpoint_wodoyybzsrcon83qbdq9jiyub3","type":"RabbitMQ","prefetch_count":16,"consumer_count":3,"message_count":3},{"name":"_bus_","type":"RabbitMQ","prefetch_count":16}]}]} {"SourceContext":"MassTransit"}
+][2025-09-16 11:57:34.072 +08:00 INF GetMyOrders Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"6aa06f88-8eaa-4b88-aafc-f9091c08203d","ActionName":"OrderService.Controllers.OrderController.GetMyOrders (OrderService)","RequestId":"0HNFKQGA7QBJP:00000002","RequestPath":"/api/Order/my-orders","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:58:07.345 +08:00 INF GetOrderById Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 for Order "c752dd53-37fb-4614-a6f2-505a9e1881ee" {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"606e846b-c42e-4d3f-9477-9f11fc082897","ActionName":"OrderService.Controllers.OrderController.GetOrderById (OrderService)","RequestId":"0HNFKQGA7QBJP:00000003","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:18.019 +08:00 INF EditOrder Endpoint - Order "c752dd53-37fb-4614-a6f2-505a9e1881ee" by User e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"60db98b4-60a4-4e9c-a782-510f6dfc8048","ActionName":"OrderService.Controllers.OrderController.EditOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000005","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:18.028 +08:00 INF Performing smart merge for order "c752dd53-37fb-4614-a6f2-505a9e1881ee". {"SourceContext":"OrderService.Services.OrderService","ActionId":"60db98b4-60a4-4e9c-a782-510f6dfc8048","ActionName":"OrderService.Controllers.OrderController.EditOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000005","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:18.059 +08:00 INF Updated order event for order "c752dd53-37fb-4614-a6f2-505a9e1881ee" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"60db98b4-60a4-4e9c-a782-510f6dfc8048","ActionName":"OrderService.Controllers.OrderController.EditOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000005","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:18.078 +08:00 INF Successfully updated order "c752dd53-37fb-4614-a6f2-505a9e1881ee". {"SourceContext":"OrderService.Services.OrderService","ActionId":"60db98b4-60a4-4e9c-a782-510f6dfc8048","ActionName":"OrderService.Controllers.OrderController.EditOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000005","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:49.763 +08:00 INF DeleteOrder Endpoint - Order ID: "c752dd53-37fb-4614-a6f2-505a9e1881ee" from User ID:e056ca84-ecf8-4dbe-9af5-f91efe653ca5. {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"3f7df474-ce02-4fc5-88d1-e75e132e2697","ActionName":"OrderService.Controllers.OrderController.DeleteOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000006","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:49.787 +08:00 INF Deleted order event for order "c752dd53-37fb-4614-a6f2-505a9e1881ee" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"3f7df474-ce02-4fc5-88d1-e75e132e2697","ActionName":"OrderService.Controllers.OrderController.DeleteOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000006","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 11:59:49.804 +08:00 INF Successfully deleted order "c752dd53-37fb-4614-a6f2-505a9e1881ee". {"SourceContext":"OrderService.Services.OrderService","ActionId":"3f7df474-ce02-4fc5-88d1-e75e132e2697","ActionName":"OrderService.Controllers.OrderController.DeleteOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000006","RequestPath":"/api/Order/c752dd53-37fb-4614-a6f2-505a9e1881ee","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:00:28.331 +08:00 INF ConfirmOrder Endpoint - Order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437" by User e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"3c247467-a202-4d8f-b233-aef6e8d55146","ActionName":"OrderService.Controllers.OrderController.ConfirmOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000007","RequestPath":"/api/Order/b159fc9d-4f85-4a6b-ae3b-cd12c7646437/confirm-order","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:00:28.338 +08:00 INF Order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437" total price: $37.98 {"SourceContext":"OrderService.Services.OrderService","ActionId":"3c247467-a202-4d8f-b233-aef6e8d55146","ActionName":"OrderService.Controllers.OrderController.ConfirmOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000007","RequestPath":"/api/Order/b159fc9d-4f85-4a6b-ae3b-cd12c7646437/confirm-order","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:00:28.345 +08:00 INF Order confirmed event for order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"3c247467-a202-4d8f-b233-aef6e8d55146","ActionName":"OrderService.Controllers.OrderController.ConfirmOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000007","RequestPath":"/api/Order/b159fc9d-4f85-4a6b-ae3b-cd12c7646437/confirm-order","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:00:28.364 +08:00 INF Successfully confirmed order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437". {"SourceContext":"OrderService.Services.OrderService","ActionId":"3c247467-a202-4d8f-b233-aef6e8d55146","ActionName":"OrderService.Controllers.OrderController.ConfirmOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000007","RequestPath":"/api/Order/b159fc9d-4f85-4a6b-ae3b-cd12c7646437/confirm-order","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:00:28.367 +08:00 INF Successfully confirmed order "b159fc9d-4f85-4a6b-ae3b-cd12c7646437". {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"3c247467-a202-4d8f-b233-aef6e8d55146","ActionName":"OrderService.Controllers.OrderController.ConfirmOrder (OrderService)","RequestId":"0HNFKQGA7QBJP:00000007","RequestPath":"/api/Order/b159fc9d-4f85-4a6b-ae3b-cd12c7646437/confirm-order","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:38.008 +08:00 INF AddOrderItems Endpoint - Order "6e487497-4eab-41c9-b9cf-e5abd0c8655a" by User e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"aa8d2784-0eb2-421a-b2ea-4d401b19d951","ActionName":"OrderService.Controllers.OrderController.AddOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000008","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:38.018 +08:00 INF Processing 1 valid items to add to order "6e487497-4eab-41c9-b9cf-e5abd0c8655a". {"SourceContext":"OrderService.Services.OrderService","ActionId":"aa8d2784-0eb2-421a-b2ea-4d401b19d951","ActionName":"OrderService.Controllers.OrderController.AddOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000008","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:38.024 +08:00 INF Successfully added/updated items in order "6e487497-4eab-41c9-b9cf-e5abd0c8655a": 0 new, 1 updated. {"SourceContext":"OrderService.Services.OrderService","ActionId":"aa8d2784-0eb2-421a-b2ea-4d401b19d951","ActionName":"OrderService.Controllers.OrderController.AddOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000008","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:38.029 +08:00 INF Updated order event for order "6e487497-4eab-41c9-b9cf-e5abd0c8655a" is passed to the message bus. {"SourceContext":"OrderService.Services.OrderService","ActionId":"aa8d2784-0eb2-421a-b2ea-4d401b19d951","ActionName":"OrderService.Controllers.OrderController.AddOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000008","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:38.038 +08:00 INF Successfully updated order "6e487497-4eab-41c9-b9cf-e5abd0c8655a". {"SourceContext":"OrderService.Services.OrderService","ActionId":"aa8d2784-0eb2-421a-b2ea-4d401b19d951","ActionName":"OrderService.Controllers.OrderController.AddOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000008","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:58.589 +08:00 INF RemoveOrderItems Endpoint - Order "6e487497-4eab-41c9-b9cf-e5abd0c8655a" by User e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.OrderController","ActionId":"afabd13f-e423-425e-a4c6-bc0c5bfd3140","ActionName":"OrderService.Controllers.OrderController.RemoveOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000009","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:58.597 +08:00 INF Attempting to remove quantities from 1 product(s) in order "6e487497-4eab-41c9-b9cf-e5abd0c8655a" {"SourceContext":"OrderService.Services.OrderService","ActionId":"afabd13f-e423-425e-a4c6-bc0c5bfd3140","ActionName":"OrderService.Controllers.OrderController.RemoveOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000009","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:58.602 +08:00 INF Reduced quantity for product "27a55e5e-9e49-4b0f-bee8-60cd6f2784ca" in order "6e487497-4eab-41c9-b9cf-e5abd0c8655a": 5 -> 2 {"SourceContext":"OrderService.Services.OrderService","ActionId":"afabd13f-e423-425e-a4c6-bc0c5bfd3140","ActionName":"OrderService.Controllers.OrderController.RemoveOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000009","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:01:58.614 +08:00 INF Successfully updated order "6e487497-4eab-41c9-b9cf-e5abd0c8655a". {"SourceContext":"OrderService.Services.OrderService","ActionId":"afabd13f-e423-425e-a4c6-bc0c5bfd3140","ActionName":"OrderService.Controllers.OrderController.RemoveOrderItems (OrderService)","RequestId":"0HNFKQGA7QBJP:00000009","RequestPath":"/api/Order/6e487497-4eab-41c9-b9cf-e5abd0c8655a/items","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:02:35.491 +08:00 INF GetAll Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"b79b37be-27f9-471d-8ea0-a18ba8aca324","ActionName":"OrderService.Controllers.ProductController.GetAll (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000B","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:02:35.498 +08:00 WRN The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased. {"EventId":{"Id":10102,"Name":"Microsoft.EntityFrameworkCore.Query.RowLimitingOperationWithoutOrderByWarning"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"b79b37be-27f9-471d-8ea0-a18ba8aca324","ActionName":"OrderService.Controllers.ProductController.GetAll (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000B","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:02:35.503 +08:00 WRN The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased. {"EventId":{"Id":10102,"Name":"Microsoft.EntityFrameworkCore.Query.RowLimitingOperationWithoutOrderByWarning"},"SourceContext":"Microsoft.EntityFrameworkCore.Query","ActionId":"b79b37be-27f9-471d-8ea0-a18ba8aca324","ActionName":"OrderService.Controllers.ProductController.GetAll (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000B","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:03:13.448 +08:00 INF GetAll Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"b79b37be-27f9-471d-8ea0-a18ba8aca324","ActionName":"OrderService.Controllers.ProductController.GetAll (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000C","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:03:18.078 +08:00 INF CreateProduct Endpoint - Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"8ab86881-f2bc-4e5e-98dd-88f1b1a5d74f","ActionName":"OrderService.Controllers.ProductController.CreateProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000D","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:03:18.106 +08:00 INF Successfully created product "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Services.ProductService","ActionId":"8ab86881-f2bc-4e5e-98dd-88f1b1a5d74f","ActionName":"OrderService.Controllers.ProductController.CreateProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000D","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:03:18.111 +08:00 INF Product creation completed successfully for: "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"8ab86881-f2bc-4e5e-98dd-88f1b1a5d74f","ActionName":"OrderService.Controllers.ProductController.CreateProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000D","RequestPath":"/api/product","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:03:30.967 +08:00 INF GetAll Endpoint - Anonymous Request N/A {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"b79b37be-27f9-471d-8ea0-a18ba8aca324","ActionName":"OrderService.Controllers.ProductController.GetAll (OrderService)","RequestId":"0HNFKQGA7QBJR:00000001","RequestPath":"/api/Product","ConnectionId":"0HNFKQGA7QBJR"}
+][2025-09-16 12:03:46.960 +08:00 INF GetProductById Endpoint - Product "faf5c158-5572-4716-80f5-aa7465f1fc53" : Anonymous Request N/A {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"ed8ed5b8-90f0-4b8a-aeb8-9a8d1a35f14a","ActionName":"OrderService.Controllers.ProductController.GetProductById (OrderService)","RequestId":"0HNFKQGA7QBJR:00000002","RequestPath":"/api/Product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJR"}
+][2025-09-16 12:04:31.944 +08:00 INF EditProduct Endpoint - Product "faf5c158-5572-4716-80f5-aa7465f1fc53" Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"165790a0-0b8b-4726-b436-a93c3df9c6ca","ActionName":"OrderService.Controllers.ProductController.EditProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000F","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:31.970 +08:00 INF Successfully updated product "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Services.ProductService","ActionId":"165790a0-0b8b-4726-b436-a93c3df9c6ca","ActionName":"OrderService.Controllers.ProductController.EditProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000F","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:31.974 +08:00 INF Product update completed successfully for: "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"165790a0-0b8b-4726-b436-a93c3df9c6ca","ActionName":"OrderService.Controllers.ProductController.EditProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:0000000F","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:40.010 +08:00 INF GetProductById Endpoint - Product "faf5c158-5572-4716-80f5-aa7465f1fc53" : Anonymous Request N/A {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"ed8ed5b8-90f0-4b8a-aeb8-9a8d1a35f14a","ActionName":"OrderService.Controllers.ProductController.GetProductById (OrderService)","RequestId":"0HNFKQGA7QBJR:00000003","RequestPath":"/api/Product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJR"}
+][2025-09-16 12:04:52.289 +08:00 INF DeleteProduct Endpoint - Product "faf5c158-5572-4716-80f5-aa7465f1fc53" Admin Request e056ca84-ecf8-4dbe-9af5-f91efe653ca5 {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"1c0af983-0ee4-4f0d-9f1a-a43a59a488fe","ActionName":"OrderService.Controllers.ProductController.DeleteProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:00000010","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:52.323 +08:00 INF Successfully deleted product "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Services.ProductService","ActionId":"1c0af983-0ee4-4f0d-9f1a-a43a59a488fe","ActionName":"OrderService.Controllers.ProductController.DeleteProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:00000010","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:52.327 +08:00 INF Product deletion completed successfully for: "faf5c158-5572-4716-80f5-aa7465f1fc53" {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"1c0af983-0ee4-4f0d-9f1a-a43a59a488fe","ActionName":"OrderService.Controllers.ProductController.DeleteProduct (OrderService)","RequestId":"0HNFKQGA7QBJP:00000010","RequestPath":"/api/product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJP"}
+][2025-09-16 12:04:57.754 +08:00 INF GetProductById Endpoint - Product "faf5c158-5572-4716-80f5-aa7465f1fc53" : Anonymous Request N/A {"SourceContext":"OrderService.Controllers.ProductController","ActionId":"ed8ed5b8-90f0-4b8a-aeb8-9a8d1a35f14a","ActionName":"OrderService.Controllers.ProductController.GetProductById (OrderService)","RequestId":"0HNFKQGA7QBJR:00000004","RequestPath":"/api/Product/faf5c158-5572-4716-80f5-aa7465f1fc53","ConnectionId":"0HNFKQGA7QBJR"}
+][2025-09-16 12:05:01.971 +08:00 INF Application is shutting down... {"SourceContext":"Microsoft.Hosting.Lifetime"}
+][2025-09-16 12:05:02.029 +08:00 INF Bus stopped: "rabbitmq://localhost/" {"SourceContext":"MassTransit"}
+]
