@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PaymentService.Consumers;
 using PaymentService.Data;
+using PaymentService.Services;
+using PaymentService.Services.Interfaces;
 using Serilog;
 
 var configuration = new ConfigurationBuilder()
@@ -26,6 +28,11 @@ try
     {
         services.AddDbContext<PaymentDbContext>(opt =>
             opt.UseNpgsql(context.Configuration.GetConnectionString("ChompPaymentDb")));
+
+        services.AddScoped<ChompWalletService>();
+        services.AddScoped<CODService>();
+        services.AddScoped<EWalletService>();
+        services.AddScoped<BankService>();
 
         services.AddMassTransit(x =>
         {
