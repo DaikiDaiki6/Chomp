@@ -4,9 +4,9 @@ using MassTransit;
 
 namespace NotificationService.Consumers.UserEvents;
 
-public class UserUpdatedConsumer: IConsumer<UserUpdatedEvent>
+public class UserDeletedConsumer: IConsumer<UserDeletedEvent>
 {
-  public async Task Consume(ConsumeContext<UserUpdatedEvent> context)
+  public async Task Consume(ConsumeContext<UserDeletedEvent> context)
   {
     await Task.CompletedTask;
   }

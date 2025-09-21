@@ -4,11 +4,11 @@ using MassTransit;
 
 namespace NotificationService.Consumers.PaymentEvents;
 
-public class PaymentFailedConsumer : IConsumer<PaymentFailedEvent>
+public class PaymentFailedConsumer: IConsumer<PaymentFailedEvent>
 {
-    public async Task Consume(ConsumeContext<PaymentFailedEvent> context)
-    {
-        await Task.CompletedTask;
-    }
-
+  public async Task Consume(ConsumeContext<PaymentFailedEvent> context)
+  {
+    await Task.CompletedTask;
+  }
 }
+
