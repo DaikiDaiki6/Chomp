@@ -20,8 +20,13 @@ public class PaymentService
 
     public async Task<List<PaymentAdminDto>> GetAllPayments(int pageNumber, int pageSize)
     {
-        if (pageNumber < 1) throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
-        if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        if (pageNumber < 1 || pageSize < 1 || pageSize > 100)
+        {
+            _logger.LogWarning("Invalid pagination parameters: pageNumber={PageNumber}, pageSize={PageSize}", pageNumber, pageSize);
+            throw new ArgumentException("Invalid pagination parameters.");
+        }
+
+        _logger.LogInformation("Fetching all payments: page {PageNumber}, size {PageSize}", pageNumber, pageSize);
 
         var payments = await _dbContext.Payments
             .AsNoTracking()
@@ -29,6 +34,8 @@ public class PaymentService
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        _logger.LogInformation("Retrieved {Count} payments for admin", payments.Count);
 
         return payments.Select(p => new PaymentAdminDto
         {
@@ -44,8 +51,13 @@ public class PaymentService
 
     public async Task<List<PaymentUserDto>> GetMyPayments(Guid userId, int pageNumber, int pageSize)
     {
-        if (pageNumber < 1) throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
-        if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        if (pageNumber < 1 || pageSize < 1 || pageSize > 100)
+        {
+            _logger.LogWarning("Invalid pagination for user {UserId}: pageNumber={PageNumber}, pageSize={PageSize}", userId, pageNumber, pageSize);
+            throw new ArgumentException("Invalid pagination parameters.");
+        }
+
+        _logger.LogInformation("Fetching payments for user {UserId}: page {PageNumber}, size {PageSize}", userId, pageNumber, pageSize);
 
         var payments = await _dbContext.Payments
             .AsNoTracking()
@@ -54,7 +66,9 @@ public class PaymentService
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
-        
+
+        _logger.LogInformation("Retrieved {Count} payments for user {UserId}", payments.Count, userId);
+
         return payments.Select(p => new PaymentUserDto
         {
             PaymentId = p.PaymentId,
@@ -68,17 +82,22 @@ public class PaymentService
 
     public async Task<object> GetPaymentById(Guid id, Guid userId, string userRole)
     {
-        // better checker for Admin/User so we don't have to do two queries.
+        _logger.LogInformation("Fetching payment {PaymentId} for {Role} (UserId={UserId})", id, userRole, userId);
+
         var payment = await _dbContext.Payments.FirstOrDefaultAsync(p =>
             p.PaymentId == id && (userRole == "Admin" || p.CustomerId == userId));
 
         if (payment is null)
         {
             var message = userRole == "Admin"
-                ? $"There is no payment with ID {id} in the database."
-                : $"There is no payment with ID {id} for this user in the database.";
+                ? $"Payment with ID {id} not found."
+                : $"Payment with ID {id} not found for user {userId}.";
+
+            _logger.LogWarning(message);
             throw new KeyNotFoundException(message);
         }
+
+        _logger.LogInformation("Payment {PaymentId} found for {Role}", id, userRole);
 
         if (userRole == "Admin")
         {
