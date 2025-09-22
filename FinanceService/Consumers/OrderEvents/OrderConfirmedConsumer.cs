@@ -1,5 +1,7 @@
 using System;
 using Contracts;
+using FinanceService.Services;
+using FinanceService.Services.Interfaces;
 using MassTransit;
 
 namespace FinanceService.OrderEvents.Consumers;
@@ -7,19 +9,26 @@ namespace FinanceService.OrderEvents.Consumers;
 public class OrderConfirmedConsumer : IConsumer<OrderConfirmedEvent>
 {
     private readonly ILogger<OrderConfirmedConsumer> _logger;
+    private readonly ICodService _codService;
+    private readonly IBankService _bankService;
+    private readonly IEWalletService _eWalletService;
+    private readonly ChompWalletService _chompWalletService;
 
-    public OrderConfirmedConsumer(ILogger<OrderConfirmedConsumer> logger)
+    public OrderConfirmedConsumer(ILogger<OrderConfirmedConsumer> logger,
+        ICodService codService,
+        IBankService bankService,
+        IEWalletService eWalletService,
+        ChompWalletService chompWalletService)
     {
         _logger = logger;
+        _bankService = bankService;
+        _chompWalletService = chompWalletService;
+        _eWalletService = eWalletService;
+        _codService = codService;
     }
-    public Task Consume(ConsumeContext<OrderConfirmedEvent> context)
+    public async Task Consume(ConsumeContext<OrderConfirmedEvent> context)
     {
         var message = context.Message;
-        // Check PaymentType == Wallet
-        // Deduct Wallet 
-        // PaymentSucceededEvent or PaymentFailedEvent
-
-        // Others just make them pending
         try
         {
             if (message is null)
@@ -30,13 +39,16 @@ public class OrderConfirmedConsumer : IConsumer<OrderConfirmedEvent>
             switch (message.PaymentType)
             {
                 case PaymentType.ChompWallet:
+                    await _chompWalletService.ChompWalletDebit(message);
                     break;
                 case PaymentType.EWallet:
+                    await _eWalletService.EWalletDebit(message);
                     break;
                 case PaymentType.Bank:
-
+                    await _bankService.BankDebit(message);
                     break;
                 case PaymentType.COD:
+                    await _codService.CodCreation(message);
                     break;
                 default:
                     throw new Exception("Invalid Payment Method");
@@ -46,10 +58,5 @@ public class OrderConfirmedConsumer : IConsumer<OrderConfirmedEvent>
         {
             _logger.LogError("{ex}", ex);
         }
-
-
-
-        return Task.CompletedTask;
-
     }
 }
