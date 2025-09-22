@@ -24,6 +24,7 @@ public class PaymentService
         if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
 
         var payments = await _dbContext.Payments
+            .AsNoTracking()
             .OrderByDescending(p => p.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
@@ -47,6 +48,7 @@ public class PaymentService
         if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
 
         var payments = await _dbContext.Payments
+            .AsNoTracking()
             .Where(p => p.CustomerId == userId)
             .OrderByDescending(p => p.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)

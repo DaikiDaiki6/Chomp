@@ -24,12 +24,20 @@ public class ExceptionHandlingMiddleware
         {
             Log.Error(ex, "Unhandled exception occurred while processing {Path}", context.Request.Path);
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            var (statusCode, error) = ex switch
+            {
+                ArgumentException => ((int)HttpStatusCode.BadRequest, ex.Message),
+                KeyNotFoundException => ((int)HttpStatusCode.NotFound, ex.Message),
+                UnauthorizedAccessException => ((int)HttpStatusCode.Unauthorized, ex.Message),
+                _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred")
+            };
+
+            context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
 
             var result = JsonSerializer.Serialize(new
             {
-                error = "An unexpected error occurred",
+                error,
                 detail = ex.Message
             });
 

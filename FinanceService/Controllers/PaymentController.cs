@@ -30,15 +30,9 @@ namespace FinanceService.Controllers
         public async Task<IActionResult> GetAllPayments(int pageNumber, int pageSize)
         {
             var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
-            try
-            {
-                var allPayments = await _paymentService.GetAllPayments(pageNumber, pageSize);
-                return Ok(allPayments);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { errorMessage = ex.Message});
-            }
+
+            var allPayments = await _paymentService.GetAllPayments(pageNumber, pageSize);
+            return Ok(allPayments);
         }
 
         [HttpGet("my-payments")]
@@ -48,18 +42,10 @@ namespace FinanceService.Controllers
 
             if (!Guid.TryParse(userId, out var userGuid))
             {
-                return Unauthorized(new { errorMessage = "Invalid user token"});
+                return Unauthorized(new { errorMessage = "Invalid user token" });
             }
-
-            try
-            {
-                var allPayments = await _paymentService.GetMyPayments(userGuid, pageNumber, pageSize);
-                return Ok(allPayments);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { errorMessage = ex.Message});
-            }
+            var allPayments = await _paymentService.GetMyPayments(userGuid, pageNumber, pageSize);
+            return Ok(allPayments);
         }
 
         [HttpGet("{id:guid}")]
@@ -69,22 +55,16 @@ namespace FinanceService.Controllers
 
             if (!Guid.TryParse(userId, out var userGuid))
             {
-                return Unauthorized(new { errorMessage = "Invalid user token"});
+                return Unauthorized(new { errorMessage = "Invalid user token" });
             }
             if (string.IsNullOrEmpty(userRole))
             {
-                return Unauthorized(new { errorMessage = "User role is missing or invalid"});
+                return Unauthorized(new { errorMessage = "User role is missing or invalid" });
             }
 
-            try
-            {
-                var payment = await _paymentService.GetPaymentById(id, userGuid, userRole);
-                return Ok(payment);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { errorMessage = ex.Message});
-            }
+            var payment = await _paymentService.GetPaymentById(id, userGuid, userRole);
+            return Ok(payment);
         }
     }
 }
+
