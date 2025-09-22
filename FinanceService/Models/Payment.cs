@@ -19,4 +19,5 @@ public class Payment
     public PaymentStatus PaymentStatus = PaymentStatus.Pending;
     public PaymentType PaymentType;
     public DateTime CreatedAt = DateTime.UtcNow;
+    public DateTime? UpdatedAt;
 };

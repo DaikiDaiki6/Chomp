@@ -1,8 +1,12 @@
 using System.Text;
 using Contracts;
 using FinanceService.Consumers;
+using FinanceService.Consumers.UserEvents;
 using FinanceService.Data;
 using FinanceService.Middleware;
+using FinanceService.OrderEvents.Consumers;
+using FinanceService.Services;
+using FinanceService.Services.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +53,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<OrderConfirmedConsumer>();
+    x.AddConsumer<UserCreatedConsumer>();
 
     x.UsingRabbitMq((context, config) =>
     {
@@ -57,12 +62,18 @@ builder.Services.AddMassTransit(x =>
         config.ReceiveEndpoint(e =>
         {
             e.ConfigureConsumer<OrderConfirmedConsumer>(context);
+            e.ConfigureConsumer<UserCreatedConsumer>(context);
         });
     }
     );
 });
 
 // Register service layer
+builder.Services.AddScoped<IBankService, BankService>();
+builder.Services.AddScoped<ChompWalletService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<ICodService, CodService>();
+builder.Services.AddScoped<IEWalletService, EWalletService>();
 
 var app = builder.Build();
 app.UseExceptionHandling(); // global exception handling for (mainly) controllers but also all services
