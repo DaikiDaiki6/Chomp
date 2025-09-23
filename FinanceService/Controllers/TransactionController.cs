@@ -37,6 +37,26 @@ namespace FinanceService.Controllers
             return Ok(transactions);
         }
 
+        [HttpGet("my-transactions")]
+        public async Task<IActionResult> GetMyTransactions(int pageNumber, int pageSize)
+        {
+            var (userId, _, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                _logger.LogWarning("Unauthorized access attempt with invalid token");
+                return Unauthorized(new { errorMessage = "Invalid user token" });
+            }
+
+            _logger.LogInformation("User {userId} requested transaction list. Page: {PageNumber}, Size: {PageSize}", userGuid, pageNumber, pageSize);
+
+            var transactions = await _transactionService.GetAllMyTransactions(pageNumber, pageSize, userGuid);
+
+            _logger.LogInformation("Returned {Count} transactions for Admin request", transactions.Count);
+
+            return Ok(transactions);
+        }
+
         [HttpGet("{id:guid}")] 
         public async Task<IActionResult> GetTransactionById(Guid id)
         {

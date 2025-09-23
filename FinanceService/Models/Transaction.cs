@@ -8,10 +8,10 @@ public enum TransactionType
 }
 public class Transaction
 {
-    public Guid TransactionId;
-    public Guid WalletId;
-    public decimal Amount;
-    public TransactionType TransactionType;
-    public Guid? RelatedOrderId; // for debits and refunds
-    public DateTime CreatedAt = DateTime.UtcNow;
+    public Guid TransactionId { get; set; }
+    public Guid WalletId { get; set; }
+    public decimal Amount { get; set; }
+    public TransactionType TransactionType { get; set; }
+    public Guid? RelatedOrderId { get; set; } // for debits and refunds
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

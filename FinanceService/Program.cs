@@ -69,11 +69,13 @@ builder.Services.AddMassTransit(x =>
 });
 
 // Register service layer
-builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<ChompWalletService>();
-builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<IBankService, BankService>();
 builder.Services.AddScoped<ICodService, CodService>();
 builder.Services.AddScoped<IEWalletService, EWalletService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<WalletService>();
+builder.Services.AddScoped<TransactionService>();
 
 var app = builder.Build();
 app.UseExceptionHandling(); // global exception handling for (mainly) controllers but also all services

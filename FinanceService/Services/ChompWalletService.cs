@@ -5,6 +5,7 @@ using FinanceService.Models;
 using FinanceService.Services.Interfaces;
 using MassTransit;
 using MassTransit.Transports;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceService.Services;
 
@@ -29,8 +30,8 @@ public class ChompWalletService
 
         try
         {
-            var wallet = await _dbContext.Wallets.FindAsync(message.CustomerId)
-                         ?? throw new Exception($"User with ID {message.CustomerId} does not have a wallet");
+            var wallet = await _dbContext.Wallets.FirstOrDefaultAsync(u => u.CustomerId == message.CustomerId)
+                         ?? throw new KeyNotFoundException($"User with ID {message.CustomerId} does not have a wallet");
 
             var newPayment = new Payment
             {

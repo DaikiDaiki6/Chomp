@@ -12,12 +12,12 @@ public enum PaymentStatus
 
 public class Payment
 {
-    public Guid PaymentId;
-    public Guid OrderId;
-    public Guid CustomerId;
-    public decimal Amount;
-    public PaymentStatus PaymentStatus = PaymentStatus.Pending;
-    public PaymentType PaymentType;
-    public DateTime CreatedAt = DateTime.UtcNow;
-    public DateTime? UpdatedAt;
+    public Guid PaymentId { get; set; }
+    public Guid OrderId { get; set; }
+    public Guid CustomerId { get; set; }
+    public decimal Amount { get; set; }
+    public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+    public PaymentType PaymentType { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 };

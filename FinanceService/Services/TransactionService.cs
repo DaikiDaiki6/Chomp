@@ -45,6 +45,35 @@ public class TransactionService
         }).ToList();
     }
 
+    public async Task<List<TransactionUserDto>> GetAllMyTransactions(int pageNumber, int pageSize, Guid userId)
+    {
+        _logger.LogInformation("Fetching all transactions. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+
+        if (pageNumber < 1) throw new ArgumentException("Page number must be 1 or greater.", nameof(pageNumber));
+        if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.", nameof(pageSize));
+        var wallet = await _dbContext.Wallets.FirstOrDefaultAsync(u => u.CustomerId == userId) ?? throw new KeyNotFoundException($"User {userId} does not have a wallet.");
+        var walletId = wallet.WalletId;
+
+        var transactions = await _dbContext.Transactions
+            .AsNoTracking()
+            .Where(u => u.WalletId == walletId)
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        _logger.LogInformation("Retrieved {Count} transactions from database", transactions.Count);
+
+        return transactions.Select(p => new TransactionUserDto
+        {
+            TransactionId = p.TransactionId,
+            Amount = p.Amount,
+            TransactionType = p.TransactionType,
+            RelatedOrderId = p.RelatedOrderId,
+            CreatedAt = p.CreatedAt
+        }).ToList();
+    }
+
     public async Task<object> GetTransactionById(Guid id, Guid userId, string userRole)
     {
         _logger.LogInformation("Fetching transactions {TransactionId} for user {UserId} with role {UserRole}", id, userId, userRole);

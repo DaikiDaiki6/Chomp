@@ -81,6 +81,22 @@ public class WalletService
         };
     }
 
+    public async Task<WalletUserDto?> GetWalletByCustomerId(Guid customerId)
+    {
+        var wallet = await _dbContext.Wallets.FirstOrDefaultAsync(w => w.CustomerId == customerId);
+        if (wallet is null)
+            {
+                throw new KeyNotFoundException("Wallet not found for this user.");
+            }
+
+            return new WalletUserDto
+            {
+                WalletId = wallet.WalletId,
+                Balance = wallet.Balance,
+                CreatedAt = wallet.CreatedAt
+            };
+    }
+
     public async Task WalletTopup(Guid userId, decimal amount)
     {
         _logger.LogInformation("User {UserId} requested top-up of {Amount}", userId, amount);

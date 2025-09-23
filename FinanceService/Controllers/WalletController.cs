@@ -39,30 +39,41 @@ namespace FinanceService.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetWalletById(Guid id)
         {
-            _logger.LogInformation("Fetching wallet {WalletId}", id);
-
             var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
 
             if (!Guid.TryParse(userId, out var userGuid))
             {
-                _logger.LogWarning("Unauthorized access attempt with invalid token for wallet {WalletId}", id);
                 return Unauthorized(new { errorMessage = "Invalid user token" });
             }
 
-            if (string.IsNullOrEmpty(userRole))
+            if (string.IsNullOrEmpty(userRole) || userRole != "Admin")
             {
-                _logger.LogWarning("Unauthorized access attempt with missing role for wallet {WalletId}", id);
-                return Unauthorized(new { errorMessage = "User role is missing or invalid" });
+                return Forbid();
             }
 
             var wallet = await _walletService.GetWalletById(id, userGuid, userRole);
 
-            _logger.LogInformation("Wallet {WalletId} successfully retrieved by {UserRole}", id, userRole);
-
             return Ok(wallet);
         }
+
+        [HttpGet("my-wallet")]
+        public async Task<IActionResult> GetMyWallet()
+        {
+            var (userId, _, _) = GetCurrentUserInfo.GetUserInfo(User);
+
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                _logger.LogWarning("Unauthorized access attempt with invalid token.");
+                return Unauthorized(new { errorMessage = "Invalid user token" });
+            }
+
+            var wallet = await _walletService.GetWalletByCustomerId(userGuid);
+            return Ok(wallet);
+        }
+
 
         [HttpPost("topup")]
         public async Task<IActionResult> WalletTopup(decimal topup)
