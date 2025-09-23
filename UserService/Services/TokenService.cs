@@ -30,7 +30,7 @@ public class TokenService : ITokenService
         _expiredTokenHelper = expiredTokenHelper;
     }
 
-    public string GenerateJwtToken(string username, Guid userId, Roles role, AccountStatus accountStatus)
+    public string GenerateJwtToken(string username, Guid userId, Roles role, string email, AccountStatus accountStatus)
     {
         var jwtConfig = _configuration.GetSection("Jwt");
         var jwtKey = jwtConfig["Key"] ?? throw new InvalidOperationException("Jwt key is missing from configuration.");
@@ -44,6 +44,7 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.UniqueName, username),
             new Claim(ClaimTypes.Role, role.ToString()),
             new Claim("username", username),
+            new Claim("email", email),
             new Claim("AccountStatus", accountStatus.ToString())
         };
 
@@ -138,7 +139,7 @@ public class TokenService : ITokenService
 
             // STEP 6: Generate brand new tokens (both JWT and refresh token)
             // Create fresh JWT token (valid for 15 minutes)
-            var newJwtToken = GenerateJwtToken(user.Username, user.UserId, user.Role, user.AccountStatus);
+            var newJwtToken = GenerateJwtToken(user.Username, user.UserId, user.Role, user.Email, user.AccountStatus);
             
             // Create fresh refresh token (valid for 7 days)
             var newRefreshToken = await GenerateRefreshTokenAsync(user.UserId);

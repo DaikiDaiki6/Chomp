@@ -122,8 +122,9 @@ namespace OrderService.Controllers
         public async Task<IActionResult> ConfirmOrder(Guid id)
         {
             var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+            var email = User.FindFirst("email")?.Value;
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
             {
                 return Unauthorized("Invalid user token");
             }
@@ -132,7 +133,7 @@ namespace OrderService.Controllers
 
             try
             {
-                var order = await _orderService.ConfirmOrderAsync(id, userGuid, userRole ?? "User");
+                var order = await _orderService.ConfirmOrderAsync(id, userGuid, userRole ?? "User", email);
 
                 _logger.LogInformation("Successfully confirmed order {OrderId}.", order.OrderId);
                 return Ok(new
@@ -207,8 +208,9 @@ namespace OrderService.Controllers
         public async Task<IActionResult> RemoveOrderItems(Guid id, List<RemoveOrderItemDto> itemsToRemove)
         {
             var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
+            var email = User.FindFirst("email")?.Value;
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
             {
                 return Unauthorized("Invalid user token");
             }
@@ -216,7 +218,7 @@ namespace OrderService.Controllers
              _logger.LogInformation("RemoveOrderItems Endpoint - Order {OrderId} by User {UserId}", id, userId);
             try
             {
-                var orders = await _orderService.RemoveOrderItemsAsync(id, itemsToRemove, userGuid, userRole ?? "User");
+                var orders = await _orderService.RemoveOrderItemsAsync(id, itemsToRemove, userGuid, userRole ?? "User", email);
                 return Ok(orders);
             }
             catch (KeyNotFoundException ex)
@@ -233,8 +235,9 @@ namespace OrderService.Controllers
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+            var email = User.FindFirst("email")?.Value;
 
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
             {
                 return Unauthorized("Invalid user token");
             }
@@ -242,7 +245,7 @@ namespace OrderService.Controllers
             _logger.LogInformation("DeleteOrder Endpoint - Order ID: {OrderId} from User ID:{UserId}.", id, userId);
             try
             {
-                await _orderService.DeleteOrderAsync(id, userGuid, userRole ?? "User");
+                await _orderService.DeleteOrderAsync(id, userGuid, userRole ?? "User", email);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

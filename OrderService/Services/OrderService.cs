@@ -212,7 +212,7 @@ public class OrderService : IOrderService
 
     }
 
-    public async Task<GetOrderDto> ConfirmOrderAsync(Guid id, Guid userId, string userRole)
+    public async Task<GetOrderDto> ConfirmOrderAsync(Guid id, Guid userId, string userRole, string email)
     {
         Order? order;
 
@@ -255,6 +255,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderConfirmedEvent(
             order.OrderId,
             order.CustomerId,
+            email,
             order.PaymentType,
             order.TotalPrice,
             DateTime.UtcNow
@@ -559,7 +560,7 @@ public class OrderService : IOrderService
         return MapToGetOrderDto.GetOrderDtoOutput(updatedOrder);
     }
 
-    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove, Guid userId, string userRole)
+    public async Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove, Guid userId, string userRole, string email)
     {
         Order? order;
 
@@ -676,6 +677,7 @@ public class OrderService : IOrderService
             await _publishEndpoint.Publish(new OrderCancelledEvent(
                 order.OrderId,
                 order.CustomerId,
+                email,
                 "All items removed from order",
                 DateTime.UtcNow
             ));
@@ -713,7 +715,7 @@ public class OrderService : IOrderService
         return MapToGetOrderDto.GetOrderDtoOutput(updatedOrder);
     }
 
-    public async Task DeleteOrderAsync(Guid id, Guid userId, string userRole)
+    public async Task DeleteOrderAsync(Guid id, Guid userId, string userRole, string email)
     {
         Order? order;
         if (userRole == "Admin")
@@ -746,6 +748,7 @@ public class OrderService : IOrderService
         await _publishEndpoint.Publish(new OrderCancelledEvent(
             order.OrderId,
             order.CustomerId,
+            email,
             "Order deleted by user request",
             DateTime.UtcNow
         ));

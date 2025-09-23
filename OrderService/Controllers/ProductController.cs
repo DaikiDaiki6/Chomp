@@ -72,11 +72,16 @@ namespace OrderService.Controllers
         public async Task<IActionResult> CreateProduct(CreateProductDto dto)
         {
             var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
+            if (!Guid.TryParse(userId, out var userGuid))
+            {
+                _logger.LogWarning("Invalid user token when requesting my-payments");
+                return Unauthorized(new { errorMessage = "Invalid user token" });
+            }
 
             _logger.LogInformation("CreateProduct Endpoint - {Role} Request {UserId}", userRole, userId);
             try
             {
-                var product = await _productService.CreateProductAsync(dto);
+                var product = await _productService.CreateProductAsync(dto, userGuid);
                 _logger.LogInformation("Product creation completed successfully for: {ProductId}", product.ProductId);
 
                 return CreatedAtAction(nameof(GetProductById), new { productId = product.ProductId }, product);

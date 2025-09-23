@@ -12,5 +12,5 @@ public interface ITokenService
     Task RevokeAllRefreshTokenAsync(Guid userId, string reason);
 
     Task<AuthResponseDto> RefreshTokenAsync(string expiredAccessToken, string refreshToken);
-    string GenerateJwtToken(string username, Guid userId, Roles role, AccountStatus accountStatus);
+    string GenerateJwtToken(string username, Guid userId, Roles role, string Email, AccountStatus accountStatus);
 }

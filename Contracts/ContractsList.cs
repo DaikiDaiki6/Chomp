@@ -50,12 +50,14 @@ public record OrderUpdatedEvent(
 public record OrderCancelledEvent(
     Guid OrderId,
     Guid CustomerId,
+    string Email,
     string Reason,
     DateTime CancelledAt);
 
 public record OrderConfirmedEvent(
     Guid OrderId,
     Guid CustomerId,
+    string Email,
     PaymentType PaymentType,
     decimal TotalPrice,
     DateTime CompletedAt);
@@ -73,6 +75,7 @@ public record OrderItem(
 // ----------------------
 public record ProductCreatedEvent(
     Guid ProductId,
+    Guid AddedBy,
     string ProductName,
     decimal Price,
     int Stock,
@@ -80,6 +83,7 @@ public record ProductCreatedEvent(
 
 public record ProductUpdatedEvent(
     Guid ProductId,
+    Guid AddedBy,
     string ProductName,
     decimal Price,
     int Stock,
@@ -87,6 +91,7 @@ public record ProductUpdatedEvent(
 
 public record ProductDeletedEvent(
     Guid ProductId,
+    Guid AddedBy,
     string ProductName,
     DateTime DeletedAt);
 
@@ -97,6 +102,7 @@ public record PaymentSucceededEvent(
     Guid PaymentId,
     Guid OrderId,
     Guid CustomerId,
+    string Email,
     decimal Amount,
     DateTime PaidAt);
 
@@ -104,6 +110,7 @@ public record PaymentFailedEvent(
     Guid PaymentId,
     Guid OrderId,
     Guid CustomerId,
+    string Email,
     string Reason,
     DateTime FailedAt);
 

@@ -35,7 +35,7 @@ namespace UserService.Controllers
             try
             {
                 var user = await _authService.ValidateUserCredentialAsync(login.Username, login.Password);
-                var token = _tokenService.GenerateJwtToken(user.Username, user.UserId, user.Role, user.AccountStatus);
+                var token = _tokenService.GenerateJwtToken(user.Username, user.UserId, user.Role, user.Email, user.AccountStatus);
                 var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.UserId);
 
                 _logger.LogInformation("User {username} logged in successfully", login.Username);

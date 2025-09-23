@@ -9,9 +9,9 @@ public interface IOrderService
     Task<GetOrderDto> GetOrderByIdAsync(Guid id, Guid userId, string userRole);
     Task<List<GetOrderDto>> GetOrdersByUserIdAsync(Guid userId, int pageNumber, int pageSize);
     Task<GetOrderDto> CreateOrderAsync(CreateOrderDto dto, Guid userId, string userRole);
-    Task<GetOrderDto> ConfirmOrderAsync(Guid id, Guid userId, string userRole);
+    Task<GetOrderDto> ConfirmOrderAsync(Guid id, Guid userId, string userRole, string email);
     Task<GetOrderDto> EditOrderAsync(Guid id, EditOrderDto dto, Guid userId, string userRole);
     Task<GetOrderDto> AddOrderItemsAsync(Guid id, List<CreateOrderItemDto> orderItems, Guid userId, string userRole);
-    Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove, Guid userId, string userRole);
-    Task DeleteOrderAsync(Guid id, Guid userId, string userRole);
+    Task<GetOrderDto> RemoveOrderItemsAsync(Guid id, List<RemoveOrderItemDto> itemsToRemove, Guid userId, string userRole, string email);
+    Task DeleteOrderAsync(Guid id, Guid userId, string userRole, string email);
 }

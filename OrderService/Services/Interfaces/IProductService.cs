@@ -7,7 +7,7 @@ public interface IProductService
 {
     Task<List<ProductDto>> GetAllAsync(int pageNumber, int pageSize);
     Task<ProductDto> GetProductByIdAsync(Guid productId);
-    Task<ProductDto> CreateProductAsync(CreateProductDto dto);
+    Task<ProductDto> CreateProductAsync(CreateProductDto dto, Guid userId);
     Task<ProductDto> EditProductAsync(Guid id, EditProductDto dto);
     Task DeleteProductAsync(Guid id); // Changed from Task<bool> to Task
 }

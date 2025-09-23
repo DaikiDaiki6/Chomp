@@ -53,6 +53,7 @@ public class ChompWalletService
                     newPayment.PaymentId,
                     newPayment.OrderId,
                     newPayment.CustomerId,
+                    message.Email,
                     "Insufficient balance in the account",
                     DateTime.UtcNow
                 ));
@@ -87,6 +88,7 @@ public class ChompWalletService
                 newPayment.PaymentId,
                 newPayment.OrderId,
                 newPayment.CustomerId,
+                message.Email,
                 newPayment.Amount,
                 DateTime.UtcNow
             ));

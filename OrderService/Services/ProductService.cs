@@ -24,7 +24,7 @@ public class ProductService : IProductService
         _logger = logger;
     }
 
-    public async Task<ProductDto> CreateProductAsync(CreateProductDto dto)
+    public async Task<ProductDto> CreateProductAsync(CreateProductDto dto, Guid userId)
     {
         // Validate input
         if (string.IsNullOrWhiteSpace(dto.ProductName))
@@ -53,6 +53,7 @@ public class ProductService : IProductService
         var product = new Product
         {
             ProductId = Guid.NewGuid(),
+            AddedBy = userId,
             ProductName = dto.ProductName,
             Price = dto.Price,
             Stock = dto.Stock,
@@ -66,6 +67,7 @@ public class ProductService : IProductService
         // Publish event
         await _publishEndpoint.Publish(new ProductCreatedEvent(
             product.ProductId,
+            product.AddedBy,
             product.ProductName,
             product.Price,
             product.Stock,
@@ -99,6 +101,7 @@ public class ProductService : IProductService
         // Publish event
         await _publishEndpoint.Publish(new ProductDeletedEvent(
             product.ProductId,
+            product.AddedBy,
             product.ProductName,
             DateTime.UtcNow
         ));
@@ -160,6 +163,7 @@ public class ProductService : IProductService
             // Publish event
             await _publishEndpoint.Publish(new ProductUpdatedEvent(
                 product.ProductId,
+                product.AddedBy,
                 product.ProductName,
                 product.Price,
                 product.Stock,

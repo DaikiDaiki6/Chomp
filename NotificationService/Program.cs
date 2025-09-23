@@ -9,6 +9,8 @@ using NotificationService.Consumers.ProductEvents;
 using NotificationService.Consumers.UserEvents;
 using NotificationService.Data;
 using NotificationService.Middleware;
+using NotificationService.Services;
+using NotificationService.Services.Interface;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,7 +54,7 @@ builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<OrderCancelledConsumer>();
     x.AddConsumer<OrderConfirmedConsumer>();
-    x.AddConsumer<OrderPlaceConsumer>();
+    x.AddConsumer<OrderPlacedConsumer>();
     x.AddConsumer<OrderUpdatedConsumer>();
     x.AddConsumer<PaymentFailedConsumer>();
     x.AddConsumer<PaymentSucceededConsumer>();
@@ -72,7 +74,7 @@ builder.Services.AddMassTransit(x =>
         {
             e.ConfigureConsumer<OrderCancelledConsumer>(context);
             e.ConfigureConsumer<OrderConfirmedConsumer>(context);
-            e.ConfigureConsumer<OrderPlaceConsumer>(context);
+            e.ConfigureConsumer<OrderPlacedConsumer>(context);
             e.ConfigureConsumer<OrderUpdatedConsumer>(context);
             e.ConfigureConsumer<PaymentFailedConsumer>(context);
             e.ConfigureConsumer<PaymentSucceededConsumer>(context);
@@ -88,6 +90,10 @@ builder.Services.AddMassTransit(x =>
 });
 
 // Register service layer
+builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<NotificationService.Services.NotificationService>();
+
 
 var app = builder.Build();
 app.UseExceptionHandling(); // global exception handling for (mainly) controllers but also all services
