@@ -122,12 +122,9 @@ namespace OrderService.Controllers
         public async Task<IActionResult> ConfirmOrder(Guid id)
         {
             var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
-            var email = User.FindFirst("email")?.Value;
-
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
-            {
-                return Unauthorized("Invalid user token");
-            }
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))return Unauthorized("Invalid user token");
+            if (string.IsNullOrEmpty(email)) return Unauthorized("User does not have an email.");
 
             _logger.LogInformation("ConfirmOrder Endpoint - Order {OrderId} by User {UserId}", id, userId);
 
@@ -208,7 +205,7 @@ namespace OrderService.Controllers
         public async Task<IActionResult> RemoveOrderItems(Guid id, List<RemoveOrderItemDto> itemsToRemove)
         {
             var (userId, userRole, isAdmin) = GetCurrentUserInfo.GetUserInfo(User);
-            var email = User.FindFirst("email")?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
             if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
             {
@@ -235,7 +232,7 @@ namespace OrderService.Controllers
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
             var (userId, userRole, _) = GetCurrentUserInfo.GetUserInfo(User);
-            var email = User.FindFirst("email")?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
             if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid) || string.IsNullOrEmpty(email))
             {
