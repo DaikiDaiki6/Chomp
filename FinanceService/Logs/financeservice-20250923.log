@@ -295,4 +295,5 @@ System.ArgumentException: Page number must be 1 or greater. (Parameter 'pageNumb
 ][2025-09-23 23:15:43.277 +08:00 WRN Payment failed for user "83b8fa56-a6b7-4a27-8c6b-6d19e33d92ef", insufficient balance. Order "22c2e38c-3879-461b-8799-4844ef47bd87" {"SourceContext":"FinanceService.Services.ChompWalletService"}
 ][2025-09-23 23:16:53.531 +08:00 WRN Payment failed for user "83b8fa56-a6b7-4a27-8c6b-6d19e33d92ef", insufficient balance. Order "22c2e38c-3879-461b-8799-4844ef47bd87" {"SourceContext":"FinanceService.Services.ChompWalletService"}
 ][2025-09-23 23:16:57.237 +08:00 WRN Payment failed for user "83b8fa56-a6b7-4a27-8c6b-6d19e33d92ef", insufficient balance. Order "22c2e38c-3879-461b-8799-4844ef47bd87" {"SourceContext":"FinanceService.Services.ChompWalletService"}
+][2025-09-23 23:19:12.187 +08:00 INF Payment succeeded for user "83b8fa56-a6b7-4a27-8c6b-6d19e33d92ef", order "22c2e38c-3879-461b-8799-4844ef47bd87", new balance 27.02 {"SourceContext":"FinanceService.Services.ChompWalletService"}
 ]
